@@ -1,0 +1,221 @@
+.container {
+  position: relative;
+  padding: 20px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.darkMode {
+  background-color: #1e1e1e;
+  color: #ffffff;
+}
+
+
+
+.floatingIcon {
+  position: absolute;
+  font-size: 3rem;
+  opacity: 0.15;
+  color: #66f026;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.floatingIcon:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+}
+
+.darkMode .floatingIcon {
+  color: #bbbbbb;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+}
+
+.darkMode .floatingIcon:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+.title {
+  font-size: 2.6rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #a18cd1, #fbc2eb, #84fab0);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+
+
+.summary {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+
+.summary p {
+  font-size: 1.2rem;
+  color: #b700ff;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.roomContainer {
+  margin-bottom: 20px;
+  padding: 15px;
+  border: 1px solid #636363;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+
+.roomHeader {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.roomTitle {
+  display: flex;
+  align-items: center;
+  font-size: 1.5rem;
+}
+
+.roomIcon {
+  margin-right: 10px;
+  font-size: 1.5rem;
+}
+
+.statusContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  color: #ff7b00;
+}
+.statusBoxpp{
+ display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #8800f8;
+  font-weight: bold;
+}
+.statusBox p {
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+  color: #8800f8;
+  font-weight: bold;
+}
+
+.icon {
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
+.devicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.deviceCard {
+  padding: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+  text-align: center;
+  transition: transform 0.2s ease;
+  position: relative;
+}
+
+.deviceCard:hover {
+  transform: scale(1.02);
+}
+
+
+.on {
+
+  border-color: #7bff00;
+}
+
+.darkMode .on {
+  
+  border-color: #73ff00;
+}
+
+.off {
+  border-color: #ff0000;
+}
+
+.darkMode .off {
+  border-color: #ff0400;
+}
+
+.deviceImage {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  margin-bottom: 10px;
+}
+
+.deviceInfo {
+  font-size: 0.9rem;
+}
+
+.editIcon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+  color: #666666;
+}
+
+.darkMode .editIcon {
+  color: #cccccc;
+}
+
+.input {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #cccccc;
+  border-radius: 4px;
+}
+
+.darkMode .input {
+  border-color: #555555;
+  background-color: #333333;
+  color: #ffffff;
+}
+
+.saveButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.saveButton:hover {
+  background-color: #0056b3;
+}

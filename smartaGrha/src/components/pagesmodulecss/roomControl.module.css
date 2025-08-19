@@ -1,0 +1,385 @@
+/* ==========================================
+   ROOM CONTROL - PREMIUM ANIMATION THEME
+   Glassmorphism + Aurora Gradient FX
+   ========================================== */
+
+.lightMode {
+  background: radial-gradient(circle at top left, #e0e0e0, #d7d8d8);
+  color: #2a2a2a;
+}
+
+.darkMode {
+  background: radial-gradient(circle at top left, #1e1e2f, #2a2a40);
+  color: #f9f9f9;
+}
+
+.container {
+  max-width: 1400px;
+  min-height: auto;
+  margin: auto;
+  padding: 2rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+}
+
+/* ===== Header ===== */
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  animation: fadeSlideIn 1.2s ease both;
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.headerTitle {
+  font-size: 2.6rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #a18cd1, #fbc2eb, #84fab0);
+  background-size: 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 6s linear infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.headerControls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* ===== Room Buttons ===== */
+.roomButton {
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  backdrop-filter: blur(10px);
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.roomButton::before {
+  content: "";
+  position: absolute;
+  top: 0; left: -75%;
+  width: 50%; height: 100%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.5), transparent);
+  transform: skewX(-20deg);
+}
+
+.roomButton:hover::before {
+  animation: slideShine 0.75s ease;
+}
+
+@keyframes slideShine {
+  to { left: 125%; }
+}
+
+.roomButton:hover {
+  background: rgba(255, 255, 255, 0.45);
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.activeRoom {
+  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
+  color: #222;
+  font-weight: 600;
+  box-shadow: 0 0 15px rgba(161,196,253,0.6);
+  animation: pulseGlow 2s infinite alternate;
+}
+
+@keyframes pulseGlow {
+  from { box-shadow: 0 0 10px rgba(161,196,253,0.3); }
+  to { box-shadow: 0 0 25px rgba(161,196,253,0.7); }
+}
+
+/* ===== Devices ===== */
+.deviceImage {
+  width: 60px;
+  height: 60px;
+  border-radius: 15px;
+  overflow: hidden;
+  background: #fff;
+  flex-shrink: 0;
+}
+
+.deviceImageStyle {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.deviceName {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #000000;
+}
+
+.deviceStatus {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.devicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  position: relative;
+  z-index: 1;
+  gap: 1.5rem;
+}
+
+/* ===== Device Card (Glass + Aurora + Animations) ===== */
+.deviceCard {
+  position: relative;
+  border-radius: 20px;
+  padding: 1.2rem;
+  background: linear-gradient(
+    120deg,
+    #ff9a9e,
+    #fad0c4,
+    #fad0c4,
+    #fbc2eb,
+    #a6c1ee,
+    #84fab0,
+    #9cf455,
+    #ffe854
+
+  );
+  background-size: 300% 300%;
+  backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+
+  animation:
+    wingFlap 0.8s ease forwards,
+    floatCard 6s ease-in-out infinite,
+    auroraShift 15s ease infinite;
+
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.deviceCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  z-index: 0;
+  border-radius: 20px;
+}
+
+.deviceCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.deviceCard:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+}
+
+
+/* ===== Animations ===== */
+@keyframes auroraShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes floatCard {
+  0%   { transform: translateY(10px) scale(0.98); }
+  50%  { transform: translateY(0px) scale(1); }
+  100% { transform: translateY(10px) scale(0.98); }
+}
+
+@keyframes wingFlap {
+  0%   { transform: scale(0.8) rotate(5deg); opacity: 0; }
+  50%  { transform: scale(1.1) rotate(-5deg); opacity: 0.6; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes ripple {
+  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+  100% { box-shadow: 0 0 0 15px rgba(255,255,255,0); }
+}
+
+.deviceCard.toggled {
+  animation: ripple 0.6s ease;
+}
+
+/* ================================
+   CONTROLS
+   ================================ */
+.controls {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.turnOffAll {
+  padding: 0.6rem 1.4rem;
+  border-radius: 30px;
+  background: #ff758c;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.deviceStatusText {
+  margin-top: 0.8rem;
+  font-size: 1rem;
+}
+
+/* ================================
+   MODALS
+   ================================ */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.modal {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 2rem;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  backdrop-filter: blur(15px);
+}
+
+.modalTitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 1rem;
+}
+
+.inputFile {
+  margin-bottom: 1rem;
+}
+
+.inputLabel {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+/* ================================
+   BUTTONS
+   ================================ */
+.addButton {
+  display: inline-block;
+  margin: 1.8rem auto;
+  padding: 0.8rem 1.6rem;
+  border-radius: 30px;
+  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
+  border: none;
+  color: #222;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addButton:hover {
+  opacity: 0.9;
+}
+
+.cancelButton {
+  padding: 0.6rem 1.4rem;
+  border-radius: 30px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.cancelButton:hover {
+  opacity: 0.9;
+}
+
+.editButton {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+}
+
+.removeButton {
+  padding: 0.4rem 1rem;
+  border-radius: 25px;
+  background: #ff4d6d;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.scheduleButton {
+  padding: 0.4rem 1rem;
+  border-radius: 25px;
+  background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
+  border: none;
+  cursor: pointer;
+}
+
+.roomSwitchButtons {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.roomButton {
+  padding: 0.5rem 1rem;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.25);
+  border: none;
+  backdrop-filter: blur(10px);
+  color: inherit;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roomButton:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.activeRoom {
+  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
+  color: #222;
+  font-weight: 600;
+}

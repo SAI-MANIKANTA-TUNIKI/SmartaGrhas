@@ -1,0 +1,111 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 1.2rem;
+  background: linear-gradient(90deg, #ffdde1, #ee9ca7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.4s ease-in-out;
+}
+
+.navbar.dark {
+  background: linear-gradient(90deg, #141e30, #243b55);
+}
+
+.logoContainer img {
+  height: 40px;
+  border-radius: 50%;
+}
+
+.menuAndDarkModeContainer {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.menuBars {
+  font-size: 1.5rem;
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: inherit;
+}
+
+.notificationIcon {
+  font-size: 1.4rem;
+  position: relative;
+}
+
+.darkModeToggle button {
+  font-size: 1.2rem;
+  padding: 0.4rem;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: rgba(255,255,255,0.3);
+  transition: background 0.3s;
+}
+
+.darkModeToggle button:hover {
+  background: rgba(255,255,255,0.6);
+}
+
+/* Sidebar */
+.navMenu {
+  background: linear-gradient(180deg, #fbc2eb, #a6c1ee);
+  width: 260px;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 1rem;
+  z-index: 999;
+  overflow-y: auto;
+}
+
+.navMenuItems {
+  list-style: none;
+  padding: 0;
+}
+
+.navbarToggle {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.5rem;
+}
+
+.navText {
+  display: flex;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  margin: 0.4rem 0.6rem;
+  background: rgba(255,255,255,0.2);
+  transition: background 0.3s, transform 0.3s;
+}
+
+.navText a, .navText button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  width: 100%;
+}
+
+.navText:hover {
+  background: rgba(255,255,255,0.4);
+  transform: scale(1.03);
+}
+
+.signOutButton {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1rem;
+  cursor: pointer;
+}

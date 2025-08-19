@@ -1,0 +1,179 @@
+/* ===============================
+   PowerSuplay.module.css
+   Butterfly-inspired UI
+   =============================== */
+
+/* ===== Base Themes ===== */
+.lightMode {
+  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
+  color: #333;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.darkMode {
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  color: #fff;
+  min-height: 100vh;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===== Container ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===== Title ===== */
+.title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #ff7eb3, #65d6ce, #f6d365);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 30px;
+}
+
+/* ===== Time Range Controls ===== */
+.controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.button {
+  padding: 10px 18px;
+  border-radius: 25px;
+  border: none;
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(6px);
+  font-weight: 500;
+  cursor: pointer;
+  color: inherit;
+  transition: all 0.3s ease;
+}
+
+.button:hover {
+  background: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.active {
+  background: linear-gradient(90deg, #ff7eb3, #65d6ce);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 126, 179, 0.4);
+}
+
+/* ===== Charts Layout ===== */
+.charts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+}
+
+.chartBox {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
+  padding: 20px;
+  flex: 1 1 450px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chartBox:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* ===== Total Usage ===== */
+.totalUsage {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.usageValue {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ff7eb3;
+}
+
+.usageChange {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ===== Summary Section ===== */
+.summary {
+  margin-top: 30px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.summary h4 {
+  margin-bottom: 15px;
+  font-weight: 600;
+  background: linear-gradient(90deg, #65d6ce, #f6d365);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.summary p {
+  margin: 5px 0;
+  font-size: 0.95rem;
+}
+
+/* ===== Device Status Table ===== */
+.deviceStatus {
+  margin-top: 30px;
+  overflow-x: auto;
+}
+
+.statusTable {
+  width: 100%;
+  border-collapse: collapse;
+  border-radius: 15px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.statusTable th,
+.statusTable td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.statusTable th {
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 600;
+}
+
+.statusTable tr {
+  transition: background 0.3s ease;
+}
+
+.statusTable tr:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .charts {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .chartBox {
+    flex: 1 1 100%;
+  }
+}

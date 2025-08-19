@@ -1,0 +1,139 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.darkMode {
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.title {
+  font-size: 2rem;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.filters {
+  display: flex;
+  gap: 20px;
+}
+
+.filterGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+}
+
+.darkMode .select {
+  background-color: #333;
+  border-color: #555;
+  color: #fff;
+}
+
+.settingsButton {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.darkMode .settingsButton {
+  background-color: #0056b3;
+}
+
+.settingsPanel {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  margin-bottom: 20px;
+}
+
+.darkMode .settingsPanel {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.settingsPanel h3 {
+  margin: 0 0 10px;
+  font-size: 1.2rem;
+}
+
+.eventTypeList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.eventTypeItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.notificationList {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.notificationCard {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.darkMode .notificationCard {
+  background-color: #2a2a2a;
+  border-color: #444;
+}
+
+.notificationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.notificationHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.notificationHeader span {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.darkMode .notificationHeader span {
+  color: #aaa;
+}

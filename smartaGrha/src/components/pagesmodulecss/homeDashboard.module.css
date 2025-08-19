@@ -1,0 +1,227 @@
+.container {
+  position: relative;
+  padding: 40px;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.dark {
+  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a42 100%);
+  color: #ffffff;
+}
+
+.backgroundIcons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.iconItem {
+  position: absolute;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.deviceIcon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+}
+
+.iconItem:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+}
+
+.dark .iconItem {
+  filter: drop-shadow(0 0 5px rgba(102, 255, 0, 0.692));
+}
+
+.dark .iconItem:hover {
+  filter: drop-shadow(0 0 10px rgb(72, 253, 17));
+}
+
+/* Smoke effect for sparkle icon */
+.smokeEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(187, 187, 187, 0.801) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: smoke 3s infinite ease-in-out;
+  transform: translate(-50%, -50%);
+}
+
+.dark .smokeEffect {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+}
+
+@keyframes smoke {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.heroText {
+  max-width: 50%;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  
+}
+
+.dark .subtitle {
+  color: #cccccc;
+}
+
+.heroImage {
+  max-width: 40%;
+}
+
+.heroImg {
+  width: 100%;
+  height: auto;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.featureCard {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .featureCard {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.featureIcon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.featureCard h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.featureCard p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.dark .featureCard p {
+  color: #cccccc;
+}
+
+.whyChoose {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.whyChoose h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.benefitItem {
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .benefitItem {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.benefitIcon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.benefitItem h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.benefitItem p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.dark .benefitItem p {
+  color: #cccccc;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heroText,
+  .heroImage {
+    max-width: 100%;
+  }
+
+  .heroTitle {
+    font-size: 2.5rem;
+  }
+
+  .features,
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+}

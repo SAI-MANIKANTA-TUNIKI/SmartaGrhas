@@ -1,0 +1,267 @@
+.container {
+  position: relative;
+  padding: 40px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.dark {
+  background: linear-gradient(135deg, #1e1e2e 0%, #2a2a42 100%);
+  color: #ffffff;
+}
+
+.backgroundIcons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.iconItem {
+  position: absolute;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.deviceIcon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+}
+
+.iconItem:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+}
+
+.dark .iconItem {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+}
+
+.dark .iconItem:hover {
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+}
+
+.smokeEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: smoke 3s infinite ease-in-out;
+  transform: translate(-50%, -50%);
+}
+
+.dark .smokeEffect {
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+}
+
+@keyframes smoke {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  position: relative;
+  z-index: 1;
+}
+
+.heroText {
+  max-width: 50%;
+}
+
+.heroText h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.dark .subtitle {
+  color: #cccccc;
+}
+
+.getStartedButton,
+.toggleDarkModeButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 10px;
+  margin-right: 10px;
+  transition: background 0.2s ease;
+}
+
+.getStartedButton:hover,
+.toggleDarkModeButton:hover {
+  background: #0056b3;
+}
+
+.dark .getStartedButton,
+.dark .toggleDarkModeButton {
+  background: #1e90ff;
+}
+
+.dark .getStartedButton:hover,
+.dark .toggleDarkModeButton:hover {
+  background: #4682b4;
+}
+
+.heroImage {
+  max-width: 40%;
+}
+
+.heroImg {
+  width: 100%;
+  height: auto;
+}
+
+.whyChoose {
+  max-width: 1200px;
+  margin: 0 auto 60px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.whyChoose h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.benefits {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.benefitCard {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .benefitCard {
+  background: #2a2a2a;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.benefitIcon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+.benefitCard h3 {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.benefitCard p {
+  font-size: 1rem;
+  color: #666;
+}
+
+.dark .benefitCard p {
+  color: #cccccc;
+}
+
+.callToAction {
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+}
+
+.callToAction h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.benefits {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+.benefitCard {
+  background: #ffffff;
+  padding: 1.25rem;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  width: 200px;
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.benefitCard:hover {
+  transform: translateY(-8px);
+}
+
+.icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.benefitCard h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+}
+
+.benefitCard p {
+  font-size: 0.95rem;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .heroText,
+  .heroImage {
+    max-width: 100%;
+  }
+
+  .heroText h1 {
+    font-size: 2.5rem;
+  }
+
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -1,0 +1,287 @@
+
+.container {
+  position: relative;
+  padding: 40px;
+  background: linear-gradient(135deg, #e6e6fa 0%, #f0f8ff 100%);
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.dark {
+  background: linear-gradient(135deg, #2a2a42 0%, #1e1e2e 100%);
+  color: #ffffff;
+}
+
+.backgroundIcons {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.iconItem {
+  position: absolute;
+  pointer-events: auto;
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+  transition: filter 0.3s ease;
+}
+
+.deviceIcon {
+  width: 40px;
+  height: 40px;
+  opacity: 0.3;
+}
+
+.iconItem:hover {
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8));
+}
+
+.dark .iconItem {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+}
+
+.dark .iconItem:hover {
+  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.8));
+}
+
+.smokeEffect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: smoke 3s infinite ease-in-out;
+  transform: translate(-50%, -50%);
+}
+
+.dark .smokeEffect {
+  background: radial-gradient(circle, rgba(0, 255, 255, 0.3) 0%, transparent 70%);
+}
+
+@keyframes smoke {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.2;
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.title h1 {
+  font-size: 2.5rem;
+  margin-bottom: 5px;
+}
+
+.title p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+.dark .title p {
+  color: #cccccc;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.addButton,
+.settingsButton {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s ease;
+}
+
+.addButton:hover,
+.settingsButton:hover {
+  background: #0056b3;
+}
+
+.dark .addButton,
+.dark .settingsButton {
+  background: #1e90ff;
+}
+
+.dark .addButton:hover,
+.dark .settingsButton:hover {
+  background: #4682b4;
+}
+
+.settingsPanel {
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.dark .settingsPanel {
+  background: #2a2a2a;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.settingsPanel button,
+.settingsPanel select {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background: #f0f0f0;
+  color: #333;
+}
+
+.dark .settingsPanel button,
+.dark .settingsPanel select {
+  background: #444;
+  color: #fff;
+}
+
+.mainContent {
+  display: flex;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.cameraGrid {
+  flex: 3;
+  gap: 10px;
+  min-height: 400px;
+}
+
+.feedContainer {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .feedContainer {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.feedInfo {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 10px;
+  text-align: center;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.cameraList {
+  flex: 1;
+  max-width: 300px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dark .cameraList {
+  background: #2a2a2a;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.cameraList h3 {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.cameraItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cameraItem:hover {
+  background: #f0f0f0;
+}
+
+.dark .cameraItem:hover {
+  background: #444;
+}
+
+.selected {
+  background: #e0e7ff;
+}
+
+.dark .selected {
+  background: #3c3c5c;
+}
+
+.cameraThumbnail {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    flex-direction: column;
+  }
+
+  .cameraList {
+    max-width: 100%;
+  }
+
+  .title h1 {
+    font-size: 2rem;
+  }
+}
