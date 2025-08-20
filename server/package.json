@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-iot-data-plane": "^3.821.0",
-    "@aws-sdk/client-s3": "^3.821.0",
+    "@aws-sdk/client-s3": "^3.864.0",
     "async-retry": "^1.3.3",
     "aws-iot-device-sdk": "^2.2.15",
     "aws-iot-device-sdk-v2": "^1.21.4",
@@ -53,7 +53,7 @@
   "devDependencies": {
     "nodemon": "^3.1.10"
   },
-    "engines": {
+  "engines": {
     "node": ">=18.0.0"
   },
   "repository": {

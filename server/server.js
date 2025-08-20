@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import http from "http";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { IoTDataPlaneClient, PublishCommand } from "@aws-sdk/client-iot-data"; // NEW: Use SDK v3
 import connectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
@@ -33,6 +34,7 @@ import ledRouter from './routes/ledRoutes.js';
 // Add this import to the existing imports
 import { startNotificationCleanup } from "./controllers/notificationController.js";
 import multerS3 from 'multer-s3'; // NEW: Add this import (install via npm i multer-s3)
+import { S3Client } from "@aws-sdk/client-s3";
 // Assuming cameraModel is needed, add this import if not already in original
 import cameraModel from "./models/cameraModel.js";
 
@@ -95,15 +97,23 @@ app.use(
 
 // File upload setup
 // NEW: Set up S3 for file uploads (replace 'your-bucket-name' with your actual S3 bucket)
-const s3 = new AWS.S3();
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  },
+});
+
 const upload = multer({
-  storage: multerS3({ // NEW: Use multer-s3 instead of diskStorage
-    s3: s3,
-    bucket: process.env.S3_BUCKET_NAME, // NEW: Add this to .env
-    acl: 'public-read', // Make files publicly accessible
+  storage: multerS3({
+    s3: s3Client,
+    bucket: process.env.S3_BUCKET_NAME, // smarta-grha
     key: (req, file, cb) => {
-      cb(null, Date.now() + path.extname(file.originalname));
+      // Append /Uploaded/ prefix here if needed
+      cb(null, `Uploaded/${Date.now()}${path.extname(file.originalname)}`);
     },
+    acl: "public-read",
   }),
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
@@ -149,9 +159,6 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-
-// MongoDB connection
-//connectDB();
 
 // AWS setup 
 AWS.config.update({
@@ -246,11 +253,11 @@ const handleMqttMessages = async () => {
         }
       }
 
-     // profile
+     {/* profile
       const profilesDir = path.join(uploadsDir, 'profiles');
        if (!fs.existsSync(profilesDir)) {
       fs.mkdirSync(profilesDir, { recursive: true });
-      }
+      } */}
       const topicParts = topic.split("/");
       let notificationData;
       if (topicParts[1] === "esp32" && topicParts[2].startsWith("dht11")) {
