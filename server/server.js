@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import http from "http";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import { IoTDataPlaneClient, PublishCommand } from "@aws-sdk/client-iot-data"; // NEW: Use SDK v3
 import connectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
@@ -19,35 +18,29 @@ import userPreferencesRouter from "./routes/userPreferencesRoutes.js";
 import powerRouter from "./routes/powerRoutes.js";
 import { startScheduleChecker } from "./controllers/roomController.js";
 import { createNotification } from "./controllers/notificationController.js";
-import { startSensorDataCleanup } from "./controllers/sensorDataController.js"; // Add this import
+import { startSensorDataCleanup } from "./controllers/sensorDataController.js";
 import multer from "multer";
 import path from "path";
-import fs from "fs";
 import AWS from "aws-sdk";
 import { mqtt, iot } from "aws-iot-device-sdk-v2";
 import roomModel from "./models/roomModel.js";
 import sensorDataModel from "./models/sensorDataModel.js";
 import powerDataModel from "./models/powerDataModel.js";
 import jwt from "jsonwebtoken";
-import { profile } from "console";
 import ledRouter from './routes/ledRoutes.js';
-// Add this import to the existing imports
 import { startNotificationCleanup } from "./controllers/notificationController.js";
-import multerS3 from 'multer-s3'; // NEW: Add this import (install via npm i multer-s3)
-import { S3Client } from "@aws-sdk/client-s3";
-// Assuming cameraModel is needed, add this import if not already in original
-import cameraModel from "./models/cameraModel.js";
+import { v2 as cloudinary } from 'cloudinary'; // NEW: Cloudinary import
+import { CloudinaryStorage } from 'multer-storage-cloudinary'; // NEW: Cloudinary storage for multer
 
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-// UPDATED: Make origin dynamic. Set CLIENT_URL in .env (e.g., your Render static site URL like https://your-frontend.onrender.com)
-// Dynamic origins for CORS and Socket.IO
+// UPDATED: Dynamic CORS for production
 const allowedOrigins = process.env.NODE_ENV === 'production' 
   ? [process.env.CLIENT_URL] 
-  : ["http://localhost:5173", "http://192.168.1.101"]; // Remove local IP for production
+  : ["http://localhost:5173"];
 
 const io = new Server(server, {
   cors: {
@@ -72,49 +65,31 @@ if (!process.env.JWT_SECRET) {
   console.error("Missing JWT_SECRET");
   process.exit(1);
 }
-if (!process.env.S3_BUCKET_NAME) {
-  console.error("Missing S3_BUCKET_NAME");
+// NEW: Validate Cloudinary credentials
+if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+  console.error("Missing Cloudinary environment variables");
   process.exit(1);
 }
 
-{/* Ensure uploads directory exists
-const uploadsDir = path.join(path.resolve(), "Uploads");
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(UploadsDir);
-}
+// NEW: Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
-app.use(
-  cors({
-    origin: ["http://localhost:5173", "http://192.168.1.101"],
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-); */}
-
-// File upload setup
-// NEW: Set up S3 for file uploads (replace 'your-bucket-name' with your actual S3 bucket)
-const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+// NEW: Set up Cloudinary storage for multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'smart-home', // Folder in Cloudinary
+    allowed_formats: ['jpg', 'jpeg', 'png'],
+    public_id: (req, file) => Date.now() + path.extname(file.originalname),
   },
 });
 
 const upload = multer({
-  storage: multerS3({
-    s3: s3Client,
-    bucket: process.env.S3_BUCKET_NAME, // smarta-grha
-    key: (req, file, cb) => {
-      // Append /Uploaded/ prefix here if needed
-      cb(null, `Uploaded/${Date.now()}${path.extname(file.originalname)}`);
-    },
-    acl: "public-read",
-  }),
+  storage,
   fileFilter: (req, file, cb) => {
     const filetypes = /jpeg|jpg|png/;
     const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
@@ -128,7 +103,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
 
-// Middleware (UPDATED CORS)
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
 app.use(
@@ -140,27 +115,27 @@ app.use(
   })
 );
 
-// UPDATED: Upload endpoints now return S3 URL
+// UPDATED: Upload endpoints return Cloudinary URLs
 app.post("/api/upload", upload.single("file"), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, fileId: req.file.key, url: req.file.location }); // NEW: Return S3 URL
+  res.status(200).json({ success: true, fileId: req.file.filename, url: req.file.path }); // Cloudinary URL
 });
 app.post("/api/upload/device", upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, imageUrl: req.file.location }); // NEW: S3 URL
+  res.status(200).json({ success: true, imageUrl: req.file.path }); // Cloudinary URL
 });
 app.post("/api/upload/room", upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, imageUrl: req.file.location }); // NEW: S3 URL
+  res.status(200).json({ success: true, imageUrl: req.file.path }); // Cloudinary URL
 });
 
-// Attach io to request 
+// Attach io to request
 app.use((req, res, next) => {
   req.io = io;
   next();
 });
 
-// AWS setup 
+// AWS setup (unchanged, still needed for MQTT)
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -168,9 +143,7 @@ AWS.config.update({
 });
 const iotData = new AWS.IotData({ endpoint: process.env.AWS_IOT_ENDPOINT });
 
-
 // MQTT connection
-// Note: This assumes static AWS credentials. If using temporary credentials, include sessionToken.
 const mqttConnection = () => {
   const config = iot.AwsIotMqttConnectionConfigBuilder.new_with_websockets()
     .with_endpoint(process.env.AWS_IOT_ENDPOINT)
@@ -211,7 +184,7 @@ const subscribeToRoomTopics = async (connection) => {
   }
 };
 
-// Handle MQTT messages
+// Handle MQTT messages (REMOVED: misplaced profilesDir block)
 const handleMqttMessages = async () => {
   const connection = mqttConnection();
 
@@ -249,15 +222,10 @@ const handleMqttMessages = async () => {
           data = { is_on: payloadString === "ON" };
         } else {
           console.error(`Invalid payload format for topic ${topic}: ${payloadString}`);
-          return; // Skip invalid payloads
+          return;
         }
       }
 
-     {/* profile
-      const profilesDir = path.join(uploadsDir, 'profiles');
-       if (!fs.existsSync(profilesDir)) {
-      fs.mkdirSync(profilesDir, { recursive: true });
-      } */}
       const topicParts = topic.split("/");
       let notificationData;
       if (topicParts[1] === "esp32" && topicParts[2].startsWith("dht11")) {
@@ -306,69 +274,50 @@ const handleMqttMessages = async () => {
           device_id,
           metadata: { temperature, humidity },
         };
-// Inside handleMqttMessages, replace the relay handling block with this:        
       } else if (topicParts[1] === "esp32" && topicParts[3].startsWith("relay")) {
         const device_id = topicParts[2];
         const relay_no = parseInt(topicParts[3].replace("relay", ""));
         const { is_on } = data;
-  // Validate payload       
         if (typeof is_on !== "boolean" || isNaN(relay_no)) {
           console.error(`Invalid relay payload for topic ${topic}:`, data);
           return;
         }
-  // Find the room with the specified device_id and relay_no       
         const room = await roomModel.findOne({ device_id, "devices.relay_no": relay_no });
         if (!room) {
           console.error(`Room not found for device_id: ${device_id}, relay_no: ${relay_no}`);
           return;
         }
- // Ensure room has a userId
-if (!room.userId) {
-    console.error(`No userId found for room with device_id: ${device_id}, relay_no: ${relay_no}`);
-    return;
-  }
-  // Find the device within the room
-   const device = room.devices.find((d) => d.relay_no === relay_no);
-  if (!device) {
-    console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
-    return;
-  }
-    // Check if the device state has changed
-  if (device.is_on === is_on) {
-    console.log(`State unchanged for Device=${device_id}, Relay=${relay_no}, is_on=${is_on}`);
-    return;
-  }
-        
-        if (device && device.is_on !== is_on) {
-            // Update device state and save
-          device.is_on = is_on;
-          await room.save();
-          // Emit device update via Socket.IO
-          io.to(room.userId.toString()).emit("deviceUpdated", {
-            userId: room.userId,
-            roomId: room._id,
-            device: { ...device, _id: device.relay_no },
-          });
-               // Create notification
-             const notificationData = {
-             userId: room.userId,
-             dashboard: "RoomControl",
-              eventType: "DeviceStatus",
-               description: `${device.type} in ${room.name} turned ${is_on ? "ON" : "OFF"}`,
-              device_id,
-             metadata: { relay_no, is_on },
-             };
-             const notification = await createNotification(notificationData);
-             if (notification) {
-              io.to(notification.userId.toString()).emit("notification", notification);
-              console.log("Emitted notification:", notification);
-             }
-        } else {
-          console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
+        if (!room.userId) {
+          console.error(`No userId found for room with device_id: ${device_id}, relay_no: ${relay_no}`);
+          return;
         }
+        const device = room.devices.find((d) => d.relay_no === relay_no);
+        if (!device) {
+          console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
+          return;
+        }
+        if (device.is_on === is_on) {
+          console.log(`State unchanged for Device=${device_id}, Relay=${relay_no}, is_on=${is_on}`);
+          return;
+        }
+        device.is_on = is_on;
+        await room.save();
+        io.to(room.userId.toString()).emit("deviceUpdated", {
+          userId: room.userId,
+          roomId: room._id,
+          device: { ...device, _id: device.relay_no },
+        });
+        notificationData = {
+          userId: room.userId,
+          dashboard: "RoomControl",
+          eventType: "DeviceStatus",
+          description: `${device.type} in ${room.name} turned ${is_on ? "ON" : "OFF"}`,
+          device_id,
+          metadata: { relay_no, is_on },
+        };
       } else if (topicParts[1] === "camera") {
         const camera_id = topicParts[2];
-        const camera = await cameraModel.findOne({ name: camera_id }); // Adjust based on your Camera model
+        const camera = await cameraModel.findOne({ name: camera_id });
         if (!camera) {
           console.error(`Camera not found for id: ${camera_id}`);
           return;
@@ -452,7 +401,7 @@ if (!room.userId) {
           }
         }
         return;
-      }else {
+      } else {
         console.error(`Unrecognized topic: ${topic}`);
         return;
       }
@@ -504,7 +453,6 @@ app.use('/stream', (req, res, next) => {
   if (!cameraIp) {
     return res.status(400).json({ message: 'Missing IP query parameter' });
   }
-  // Validate IP format
   const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/;
   if (!ipRegex.test(cameraIp)) {
     return res.status(400).json({ message: 'Invalid camera IP format' });
@@ -520,7 +468,7 @@ app.use('/stream', (req, res, next) => {
       res.status(500).json({ message: 'Failed to connect to camera stream', error: err.message });
     },
     onProxyRes: (proxyRes, req, res) => {
-      proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173';
+      proxyRes.headers['Access-Control-Allow-Origin'] = allowedOrigins[0];
       proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
       proxyRes.headers['Access-Control-Allow-Methods'] = 'GET';
       proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type';
@@ -546,7 +494,7 @@ app.use("/api/preferences", userPreferencesRouter);
 app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
-// Schedule endpoint with notification
+// Schedule endpoint
 app.post("/api/schedule", async (req, res) => {
   try {
     const { device_id, relay_no, action, time } = req.body;
@@ -581,20 +529,14 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
-// MongoDB connection with error handling
+// Start server with DB connection
 const startServer = async () => {
   try {
     await connectDB();
-// Start schedule checker
-startScheduleChecker(io);
-// Start sensor data cleanup
-startSensorDataCleanup(); // Add this line
-// Add this line to start notification cleanup
-startNotificationCleanup();
-// Start MQTT message handling
-handleMqttMessages();
-
-    // Start server
+    startScheduleChecker(io);
+    startSensorDataCleanup();
+    startNotificationCleanup();
+    handleMqttMessages();
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -604,5 +546,4 @@ handleMqttMessages();
   }
 };
 
-// Start the server
 startServer();
