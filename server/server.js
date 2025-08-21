@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -21,16 +22,15 @@ import { createNotification } from "./controllers/notificationController.js";
 import { startSensorDataCleanup } from "./controllers/sensorDataController.js";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import AWS from "aws-sdk";
 import { mqtt, iot } from "aws-iot-device-sdk-v2";
 import roomModel from "./models/roomModel.js";
 import sensorDataModel from "./models/sensorDataModel.js";
 import powerDataModel from "./models/powerDataModel.js";
-import jwt from "jsonwebtoken";
 import ledRouter from './routes/ledRoutes.js';
 import { startNotificationCleanup } from "./controllers/notificationController.js";
-import { v2 as cloudinary } from 'cloudinary'; // NEW: Cloudinary import
-import { CloudinaryStorage } from 'multer-storage-cloudinary'; // NEW: Cloudinary storage for multer
+import cameraModel from "./models/cameraModel.js"; // Added missing import
 
 dotenv.config();
 
@@ -48,6 +48,8 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
+  pingTimeout: 60000, // Increased to prevent idle disconnects on Render
+  pingInterval: 25000,
 });
 
 const PORT = process.env.PORT || 5000;
@@ -65,43 +67,6 @@ if (!process.env.JWT_SECRET) {
   console.error("Missing JWT_SECRET");
   process.exit(1);
 }
-// NEW: Validate Cloudinary credentials
-if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-  console.error("Missing Cloudinary environment variables");
-  process.exit(1);
-}
-
-// NEW: Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-// NEW: Set up Cloudinary storage for multer
-const storage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'smart-home', // Folder in Cloudinary
-    allowed_formats: ['jpg', 'jpeg', 'png'],
-    public_id: (req, file) => Date.now() + path.extname(file.originalname),
-  },
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const filetypes = /jpeg|jpg|png/;
-    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = filetypes.test(file.mimetype);
-    if (extname && mimetype) {
-      cb(null, true);
-    } else {
-      cb(new Error("Only JPEG/PNG images are allowed"));
-    }
-  },
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-});
 
 // Middleware
 app.use(express.json());
@@ -115,18 +80,81 @@ app.use(
   })
 );
 
-// UPDATED: Upload endpoints return Cloudinary URLs
-app.post("/api/upload", upload.single("file"), (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, fileId: req.file.filename, url: req.file.path }); // Cloudinary URL
+// File upload setup with AWS S3 (to handle ephemeral filesystem on Render)
+const s3 = new AWS.S3({
+  accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
 });
-app.post("/api/upload/device", upload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, imageUrl: req.file.path }); // Cloudinary URL
+
+const upload = multer({
+  storage: multer.memoryStorage(), // Use memory to buffer, then upload to S3
+  fileFilter: (req, file, cb) => {
+    const filetypes = /jpeg|jpg|png/;
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = filetypes.test(file.mimetype);
+    if (extname && mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPEG/PNG images are allowed"));
+    }
+  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
 });
-app.post("/api/upload/room", upload.single("image"), (req, res) => {
+
+app.post("/api/upload", upload.single("file"), async (req, res) => {
   if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
-  res.status(200).json({ success: true, imageUrl: req.file.path }); // Cloudinary URL
+
+  const params = {
+    Bucket: process.env.AWS_S3_BUCKET_NAME, // Add this env var in Render
+    Key: `${Date.now()}${path.extname(req.file.originalname)}`,
+    Body: req.file.buffer,
+    ContentType: req.file.mimetype,
+    ACL: 'public-read', // If you want public access
+  };
+
+  try {
+    const data = await s3.upload(params).promise();
+    res.status(200).json({ success: true, fileUrl: data.Location });
+  } catch (err) {
+    console.error("S3 upload error:", err);
+    res.status(500).json({ success: false, message: "Upload failed" });
+  }
+});
+
+// Dynamic proxy for camera streams
+app.use('/stream', (req, res, next) => {
+  const cameraIp = req.query.ip;
+  if (!cameraIp) {
+    return res.status(400).json({ message: 'Missing IP query parameter' });
+  }
+  const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/;
+  if (!ipRegex.test(cameraIp)) {
+    return res.status(400).json({ message: 'Invalid camera IP format' });
+  }
+  const target = `http://${cameraIp}`;
+  console.log(`Proxying stream request to: ${target}/stream`);
+  createProxyMiddleware({
+    target: target,
+    changeOrigin: true,
+    pathRewrite: { '^/stream': '/stream' },
+    onError: (err, req, res) => {
+      console.error(`Proxy error for ${target}/stream:`, err.message);
+      res.status(500).json({ message: 'Failed to connect to camera stream', error: err.message });
+    },
+    onProxyRes: (proxyRes, req, res) => {
+      proxyRes.headers['Access-Control-Allow-Origin'] = 'http://localhost:5173';
+      proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
+      proxyRes.headers['Access-Control-Allow-Methods'] = 'GET';
+      proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type';
+      if (proxyRes.headers['content-type']?.includes('multipart/x-mixed-replace')) {
+        res.setHeader('Content-Type', 'multipart/x-mixed-replace; boundary=--myboundary');
+      }
+    },
+    onProxyReq: (proxyReq, req, res) => {
+      console.log(`Proxy request: ${req.method} ${req.url} -> ${target}/stream`);
+    },
+  })(req, res, next);
 });
 
 // Attach io to request
@@ -135,7 +163,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// AWS setup (unchanged, still needed for MQTT)
+// AWS setup
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -184,7 +212,7 @@ const subscribeToRoomTopics = async (connection) => {
   }
 };
 
-// Handle MQTT messages (REMOVED: misplaced profilesDir block)
+// Handle MQTT messages
 const handleMqttMessages = async () => {
   const connection = mqttConnection();
 
@@ -303,7 +331,6 @@ const handleMqttMessages = async () => {
         device.is_on = is_on;
         await room.save();
         io.to(room.userId.toString()).emit("deviceUpdated", {
-          userId: room.userId,
           roomId: room._id,
           device: { ...device, _id: device.relay_no },
         });
@@ -447,41 +474,6 @@ io.on("connection", (socket) => {
   });
 });
 
-// Dynamic proxy for camera streams
-app.use('/stream', (req, res, next) => {
-  const cameraIp = req.query.ip;
-  if (!cameraIp) {
-    return res.status(400).json({ message: 'Missing IP query parameter' });
-  }
-  const ipRegex = /^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:\d+)?$/;
-  if (!ipRegex.test(cameraIp)) {
-    return res.status(400).json({ message: 'Invalid camera IP format' });
-  }
-  const target = `http://${cameraIp}`;
-  console.log(`Proxying stream request to: ${target}/stream`);
-  createProxyMiddleware({
-    target: target,
-    changeOrigin: true,
-    pathRewrite: { '^/stream': '/stream' },
-    onError: (err, req, res) => {
-      console.error(`Proxy error for ${target}/stream:`, err.message);
-      res.status(500).json({ message: 'Failed to connect to camera stream', error: err.message });
-    },
-    onProxyRes: (proxyRes, req, res) => {
-      proxyRes.headers['Access-Control-Allow-Origin'] = allowedOrigins[0];
-      proxyRes.headers['Access-Control-Allow-Credentials'] = 'true';
-      proxyRes.headers['Access-Control-Allow-Methods'] = 'GET';
-      proxyRes.headers['Access-Control-Allow-Headers'] = 'Content-Type';
-      if (proxyRes.headers['content-type']?.includes('multipart/x-mixed-replace')) {
-        res.setHeader('Content-Type', 'multipart/x-mixed-replace; boundary=--myboundary');
-      }
-    },
-    onProxyReq: (proxyReq, req, res) => {
-      console.log(`Proxy request: ${req.method} ${req.url} -> ${target}/stream`);
-    },
-  })(req, res, next);
-});
-
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
@@ -494,7 +486,7 @@ app.use("/api/preferences", userPreferencesRouter);
 app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
-// Schedule endpoint
+// Schedule endpoint with notification
 app.post("/api/schedule", async (req, res) => {
   try {
     const { device_id, relay_no, action, time } = req.body;
@@ -529,7 +521,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
-// Start server with DB connection
+// MongoDB connection with error handling
 const startServer = async () => {
   try {
     await connectDB();

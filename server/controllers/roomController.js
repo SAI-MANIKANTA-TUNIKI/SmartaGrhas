@@ -5,7 +5,6 @@ import { check, validationResult } from "express-validator";
 import AWS from "aws-sdk";
 import { createNotification } from "./notificationController.js";
 
-
 // AWS IoT MQTT configuration
 AWS.config.update({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -111,7 +110,6 @@ const checkSchedules = async (io) => {
             relay_no: schedule.relay_no,
           });
           io.to(schedule.userId.toString()).emit("scheduleDeleted", {
-            userId: schedule.userId,
             esp32_ip: schedule.esp32_ip,
             relay_no: schedule.relay_no,
           });
@@ -121,7 +119,6 @@ const checkSchedules = async (io) => {
       if (updated) {
         await room.save();
         io.to(schedule.userId.toString()).emit("deviceUpdated", {
-          userId: schedule.userId,
           roomId: room._id,
           device,
         });
@@ -138,7 +135,6 @@ export const startScheduleChecker = (io) => {
   setInterval(() => checkSchedules(io), interval);
 };
 
-
 // Add room
 export const addRoom = [
   check("name").notEmpty().withMessage("Room name is required"),
@@ -148,14 +144,13 @@ export const addRoom = [
     .matches(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/)
     .withMessage("Invalid IP address format"),
   check("device_id").notEmpty().withMessage("Device ID is required"),
-  check("image_url").notEmpty().withMessage("Image URL is required"),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { name, esp32_ip, device_id, image_url } = req.body;
+    const { name, esp32_ip, device_id } = req.body;
     const userId = req.userId;
 
     try {
@@ -169,7 +164,6 @@ export const addRoom = [
         esp32_ip,
         device_id,
         name,
-        image_url,
         devices: [],
       });
       await room.save();
@@ -252,7 +246,7 @@ export const updateRoom = [
       room.device_id = device_id;
       await room.save();
 
-      req.io.to(userId.toString()).emit("roomUpdated", { userId, room });
+      req.io.to(userId.toString()).emit("roomUpdated", { room });
       res.status(200).json({ success: true, message: "Room updated successfully", room });
     } catch (error) {
       console.error("Update room error:", error.message);
@@ -273,7 +267,7 @@ export const deleteRoom = async (req, res) => {
     }
 
     await scheduleModel.deleteMany({ userId, esp32_ip: room.esp32_ip });
-    req.io.to(userId.toString()).emit("roomDeleted", { userId, roomId });
+    req.io.to(userId.toString()).emit("roomDeleted", { roomId });
     res.status(200).json({ success: true, message: "Room deleted successfully" });
   } catch (error) {
     console.error("Delete room error:", error.message);
@@ -288,14 +282,13 @@ export const addDevice = [
   check("relay_no")
     .isInt({ min: 0, max: 100 })
     .withMessage("Relay number must be an integer between 0 and 100"),
-  check("image_url").notEmpty().withMessage("Image URL is required"),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    const { room_id, type, relay_no, image_url, is_on = false } = req.body;
+    const { room_id, type, relay_no, is_on = false } = req.body;
     const userId = req.userId;
 
     try {
@@ -304,19 +297,23 @@ export const addDevice = [
         return res.status(404).json({ success: false, message: "Room not found" });
       }
 
-      const existingDevice = room.devices.find((d) => d.relay_no === relay_no);
+      const existingDevice = room.devices.find((d) => d.relay_no === parseInt(relay_no));
       if (existingDevice) {
         return res.status(400).json({ success: false, message: "Relay number already assigned" });
       }
 
-      const device = { type, relay_no, image_url, is_on };
-      room.devices.push(device);
+      const newDevice = {
+        type,
+        relay_no: parseInt(relay_no),
+        is_on,
+      };
+      room.devices.push(newDevice);
       await room.save();
 
-      await publishRelayState(room.device_id, relay_no, is_on);
+      await publishRelayState(room.device_id, newDevice.relay_no, is_on, req.io, userId);
 
-      req.io.to(userId.toString()).emit("deviceAdded", { userId, roomId: room_id, device });
-      res.status(201).json({ success: true, message: "Device added successfully", device });
+      req.io.to(userId.toString()).emit("deviceAdded", { roomId: room_id, device: newDevice });
+      res.status(201).json({ success: true, message: "Device added successfully", device: newDevice });
     } catch (error) {
       console.error("Add device error:", error.message);
       res.status(500).json({ success: false, message: "Server error" });
@@ -327,14 +324,13 @@ export const addDevice = [
 // Update device
 export const updateDevice = [
   check("type").optional().notEmpty().withMessage("Device type cannot be empty"),
-  check("image_url").optional().notEmpty().withMessage("Image URL cannot be empty"),
   async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ success: false, errors: errors.array() });
     }
     const { relay_no } = req.params;
-    const { type, image_url, is_on } = req.body;
+    const { type, is_on } = req.body;
     const userId = req.userId;
 
     try {
@@ -348,18 +344,17 @@ export const updateDevice = [
         return res.status(404).json({ success: false, message: "Device not found" });
       }
 
-let changed = false;
+      let changed = false;
       if (type) device.type = type;
-      if (image_url) device.image_url = image_url;
       if (typeof is_on === "boolean" && device.is_on !== is_on) {
         device.is_on = is_on;
         changed = true;
         await publishRelayState(room.device_id, parseInt(relay_no), is_on, req.io, userId);
       }
 
-      if (changed || type || image_url) {
+      if (changed || type) {
         await room.save();
-        req.io.to(userId.toString()).emit("deviceUpdated", { userId, roomId: room._id, device });
+        req.io.to(userId.toString()).emit("deviceUpdated", { roomId: room._id, device });
 
         if (changed) {
           const notificationData = {
@@ -378,8 +373,6 @@ let changed = false;
       } else {
         console.log(`State unchanged for Device=${room.device_id}, Relay=${relay_no}, is_on=${is_on}`);
       }
-      await room.save();
-      req.io.to(userId.toString()).emit("deviceUpdated", { userId, roomId: room._id, device });
       res.status(200).json({ success: true, message: "Device updated successfully", device });
     } catch (error) {
       console.error("Update device error:", error.message);
@@ -403,7 +396,7 @@ export const deleteDevice = async (req, res) => {
     await room.save();
     await scheduleModel.deleteOne({ userId, esp32_ip: room.esp32_ip, relay_no: parseInt(relay_no) });
 
-    req.io.to(userId.toString()).emit("deviceDeleted", { userId, relay_no: parseInt(relay_no) });
+    req.io.to(userId.toString()).emit("deviceDeleted", { relay_no: parseInt(relay_no) });
     res.status(200).json({ success: true, message: "Device deleted successfully" });
   } catch (error) {
     console.error("Delete device error:", error.message);
@@ -455,6 +448,7 @@ export const addSchedule = [
         relay_no: parseInt(relay_no),
         on_time: on_time ? new Date(on_time) : null,
         off_time: off_time ? new Date(off_time) : null,
+        recurring: false,  // Default to false since not in client
       });
       await schedule.save();
 
@@ -631,7 +625,6 @@ export const reportDeviceStatus = [
       await room.save();
 
       req.io.to(room.userId.toString()).emit("deviceUpdated", {
-        userId: room.userId,
         roomId: room._id,
         device,
       });
@@ -688,12 +681,12 @@ export const triggerSchedule = [
         return res.status(404).json({ success: false, message: "Device not found" });
       }
 
-      await publishRelayState(room.device_id, parseInt(relay_no), is_on);
+      await publishRelayState(room.device_id, parseInt(relay_no), is_on, req.io, userId);
       device.is_on = is_on;
       await room.save();
 
       req.io.to(userId.toString()).emit("scheduleTriggered", { esp32_ip, relay_no, is_on });
-      req.io.to(userId.toString()).emit("deviceUpdated", { userId, roomId: room._id, device });
+      req.io.to(userId.toString()).emit("deviceUpdated", { roomId: room._id, device });
 
       const notificationData = {
         userId,
@@ -715,6 +708,3 @@ export const triggerSchedule = [
     }
   },
 ];
-
-
-

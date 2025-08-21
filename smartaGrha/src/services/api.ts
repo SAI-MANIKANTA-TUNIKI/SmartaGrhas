@@ -31,12 +31,12 @@ export const resetPassword = (data: { email: string; otp: string; password: stri
 
 //export const getUserData = () => api.get("/user/data");
 
-export const addRoom = (data: { name: string; esp32_ip: string; device_id: string; image_url: string }) =>
+export const addRoom = (data: { name: string; esp32_ip: string; device_id: string}) =>
   api.post("/room/add", data);
 
 export const getRooms = () => api.get("/room/list");
 
-export const updateRoom = (roomId: string, data: { name: string; device_id: string; image_url?: string }) => {
+export const updateRoom = (roomId: string, data: { name: string; device_id: string}) => {
   return api.put(`/room/update/${roomId}`, data);
 };
 export const deleteRoom = (roomId: string) => api.delete(`/room/delete/${roomId}`);
@@ -45,7 +45,6 @@ export const addDevice = (data: {
   room_id: string;
   type: string;
   relay_no: number;
-  image_url: string;
   is_on?: boolean;
 }) => api.post("/room/device/add", data);
 

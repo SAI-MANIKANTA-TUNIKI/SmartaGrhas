@@ -17,11 +17,6 @@ const deviceSchema = new mongoose.Schema({
       message: "relay_no must be an integer between 0 and 100",
     },
   },
-  image_url: {
-    type: String,
-    required: true,
-    trim: true,
-  },
   is_on: {
     type: Boolean,
     default: false,
@@ -52,11 +47,6 @@ const roomSchema = new mongoose.Schema({
     default: () => crypto.randomBytes(16).toString("hex"),
   },
   name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  image_url: {
     type: String,
     required: true,
     trim: true,
