@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, easeInOut } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import styles from '../pagesmodulecss/welcomeDashboard.module.css';
-import WelcomImage from '../../assets/welcome.jpg';
+
 
 interface WelcomeDashboardProps {
   darkMode: boolean;
@@ -21,16 +21,6 @@ const fadeFloatVariants = {
   },
 };
 
-const floatGentle = {
-  animate: {
-    y: [0, -12, 0],
-    transition: {
-      duration: 4,
-      repeat: Infinity,
-      ease: easeInOut,
-    },
-  },
-};
 
 const staggerContainer = {
   hidden: {},
@@ -135,13 +125,6 @@ const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({ darkMode, onToggleD
             {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
           </motion.button>
         </div>
-        <motion.div className={styles.heroImage} variants={floatGentle} animate="animate">
-          <img
-            src= {WelcomImage}
-            alt="Smart Home Illustration"
-            className={styles.heroImg}
-          />
-        </motion.div>
       </motion.div>
 
       {/* Why Choose Section */}

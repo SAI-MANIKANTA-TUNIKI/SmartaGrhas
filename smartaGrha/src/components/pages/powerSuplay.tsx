@@ -96,7 +96,7 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          🦋 Power Supply Dashboard
+          ⚡ Power Supply Dashboard ⚡
         </motion.h2>
 
         <div className={styles.controls}>

@@ -105,22 +105,6 @@
   color: #cccccc;
 }
 
-.heroImage {
-  max-width: 40%;
-  aspect-ratio: 1/1; /* Ensures a perfect square for the circular shape */
-  overflow: hidden; /* Clips the image to the circular boundary */
-  border-radius: 50%; /* Makes the container circular */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.heroImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* Ensures the image fills the circle without distortion */
-}
-
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));

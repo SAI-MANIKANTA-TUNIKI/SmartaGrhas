@@ -1,7 +1,7 @@
 import React from 'react';
-import { motion, easeInOut } from 'framer-motion';
+import { motion } from 'framer-motion';
 import styles from '../pagesmodulecss/homeDashboard.module.css';
-import HomeImage from '../../assets/home.jpg';
+
 
 interface HomeDashboardProps {
   darkMode: boolean;
@@ -16,12 +16,7 @@ const fadeFloat = {
   }
 };
 
-const floatLoop = {
-  animate: {
-    y: [0, -10, 0],
-    transition: { duration: 4, repeat: Infinity, ease: easeInOut }
-  }
-};
+
 
 const staggerContainer = {
   hidden: {},
@@ -103,17 +98,7 @@ const HomeDashboard: React.FC<HomeDashboardProps> = ({ darkMode }) => {
           </p>
         </motion.div>
 
-        <motion.div
-          className={styles.heroImage}
-          variants={floatLoop}
-          animate="animate"
-        >
-          <img
-            src= {HomeImage}
-            alt="Smart Home Illustration"
-            className={styles.heroImg}
-          />
-        </motion.div>
+
       </motion.div>
 
       {/* Features */}

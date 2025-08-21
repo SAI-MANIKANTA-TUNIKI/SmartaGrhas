@@ -167,12 +167,13 @@
   border-color: #ff0400;
 }
 
-.deviceImage {
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  margin-bottom: 10px;
+.deviceIcon {
+  font-size: 1.5rem;
+  margin-right: 8px;
+  color: var(--primary-color, #4cafef);
+  vertical-align: middle;
 }
+
 
 .deviceInfo {
   font-size: 0.9rem;

@@ -1,9 +1,3 @@
-// Client-side: src/components/RoomControl.tsx (corrected)
-// Note: Removed unused editData imageFile since no upload implemented. Fixed types, ensured relay_no consistency as number.
-// Added String(relay_no) for devices state to avoid coercion issues. Removed profitData rename (it's active devices count).
-// Cleaned up unused imports/variables. Ensured all socket events handle userId if present (though server emits without in some).
-// Fixed potential null currentRoom in handlers. Added missing imports if any. No syntax errors found, but improved logic.
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform } from "framer-motion";
@@ -23,7 +17,14 @@ import {
   getLatestSensorData,
 } from "../../services/api";
 import ToggleSwitch from "../toggleswitch/toggleswitch";
-import styles from "../Pagesmodulecss/RoomControl.module.css";
+import styles from "../pagesmodulecss/roomControl.module.css";
+import { FaPlug, FaBlender, FaWifi, FaTv, FaLightbulb, FaFan, FaDesktop } from 'react-icons/fa';
+import { MdMicrowave } from 'react-icons/md';
+import { GiWashingMachine, GiHairStrands } from 'react-icons/gi';
+import { TbAirConditioning } from 'react-icons/tb';
+import { WiHumidity, WiThermometer } from 'react-icons/wi';
+import { RiFridgeFill } from 'react-icons/ri';
+import { GiAirZigzag } from 'react-icons/gi';
 
 const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
 
@@ -50,7 +51,7 @@ interface NewDevice {
   relay_no: string;
 }
 
-interface OfficeRoomProps {
+interface RoomProps {
   darkMode: boolean;
   onToggleDarkMode?: () => void;
 }
@@ -67,7 +68,25 @@ interface SensorData {
   humidity: number | null;
 }
 
-// ---------- Inline SVG Icons (24x24) ---------- //
+// Device Icon Mapping
+const getDeviceIcon = (name: string) => {
+  const lower = name.toLowerCase();
+  if (lower.includes('light')) return <FaLightbulb className={styles.deviceIcon} />;
+  if (lower.includes('fan')) return <FaFan className={styles.deviceIcon} />;
+  if (lower.includes('ac') || lower.includes('air conditioner')) return <TbAirConditioning className={styles.deviceIcon} />;
+  if (lower.includes('tv')) return <FaTv className={styles.deviceIcon} />;
+  if (lower.includes('washing')) return <GiWashingMachine className={styles.deviceIcon} />;
+  if (lower.includes('fridge') || lower.includes('refrigerator')) return <RiFridgeFill className={styles.deviceIcon} />;
+  if (lower.includes('air purifier')) return <GiAirZigzag className={styles.deviceIcon} />;
+  if (lower.includes('juicer')) return <FaBlender className={styles.deviceIcon} />;
+  if (lower.includes('microwave')) return <MdMicrowave className={styles.deviceIcon} />;
+  if (lower.includes('hairdryer') || lower.includes('hair dryer')) return <GiHairStrands className={styles.deviceIcon} />;
+  if (lower.includes('wifi') || lower.includes('wi-fi')) return <FaWifi className={styles.deviceIcon} />;
+  if (lower.includes('socket') || lower.includes('plug')) return <FaPlug className={styles.deviceIcon} />;
+  return <FaDesktop className={styles.deviceIcon} />;
+};
+
+// Inline SVG Icons
 const IconWrap: React.FC<{ children: React.ReactNode; size?: number }> = ({ children, size = 24 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
     {children}
@@ -119,7 +138,7 @@ const MonitorIcon = ({ size = 30 }: { size?: number }) => (
   </IconWrap>
 );
 
-// ---------- Background Ornaments ---------- //
+// Background Ornaments
 const ApplianceParticle: React.FC<{
   i: number;
   color: string;
@@ -244,7 +263,7 @@ const BackgroundFX: React.FC<{ darkMode: boolean; activeCount: number }> = ({ da
   );
 };
 
-const RoomControl: React.FC<OfficeRoomProps> = ({ darkMode }) => {
+const RoomControl: React.FC<RoomProps> = ({ darkMode }) => {
   const [rooms, setRooms] = useState<RoomConfig[]>([]);
   const [currentRoom, setCurrentRoom] = useState<RoomConfig | null>(null);
   const [devices, setDevices] = useState<DeviceState>({});
@@ -663,8 +682,14 @@ const RoomControl: React.FC<OfficeRoomProps> = ({ darkMode }) => {
 
         {currentRoom && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className={styles.sensorData}>
-            <p>Temperature: {sensorDataMap[currentRoom.device_id]?.temperature ?? "N/A"}°C</p>
-            <p>Humidity: {sensorDataMap[currentRoom.device_id]?.humidity ?? "N/A"}%</p>
+            <div className={styles.sensorItem}>
+              <WiThermometer size={24} />
+              <p>Temperature: {sensorDataMap[currentRoom.device_id]?.temperature ?? "N/A"}°C</p>
+            </div>
+            <div className={styles.sensorItem}>
+              <WiHumidity size={24} />
+              <p>Humidity: {sensorDataMap[currentRoom.device_id]?.humidity ?? "N/A"}%</p>
+            </div>
           </motion.div>
         )}
 
@@ -674,52 +699,54 @@ const RoomControl: React.FC<OfficeRoomProps> = ({ darkMode }) => {
               {currentRoom.devices.map((device, i) => {
                 const relayKey = String(device.relay_no);
                 return (
-                <motion.div key={device.relay_no} className={styles.deviceCard}
-                  initial={{ opacity: 0, scale: 0.8, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.8, y: 10 }}
-                  transition={{ delay: i * 0.06 }}
-                >
-                  <div className={styles.deviceInfo}>
-                    <div className={styles.deviceName}>
-                      {editMode[relayKey] ? (
-                        <div className={styles.editDeviceControls}>
-                          <input
-                            type="text"
-                            value={editData[device.relay_no]?.type || ""}
-                            onChange={(e) =>
-                              setEditData((prev) => ({
-                                ...prev,
-                                [device.relay_no]: { ...prev[device.relay_no], type: e.target.value },
-                              }))
-                            }
-                            className={styles.input}
-                            placeholder="Device Name"
-                          />
-                          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleSaveEdit(device.relay_no)} className={styles.addButton}>
-                            Save
-                          </motion.button>
-                          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleCancelEdit(device.relay_no)} className={styles.cancelButton}>
-                            Cancel
-                          </motion.button>
-                          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleRemoveDevice(device.relay_no)} className={styles.removeButton}>
-                            Remove
-                          </motion.button>
-                        </div>
-                      ) : (
-                        <span>{device.type}</span>
-                      )}
-                      <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className={styles.editButton} onClick={() => handleEditButtonClick(device.relay_no)}>
-                        <span className={styles.threeDots}>...</span>
-                      </motion.button>
+                  <motion.div key={device.relay_no} className={styles.deviceCard}
+                    initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: 10 }}
+                    transition={{ delay: i * 0.06 }}
+                  >
+                    <div className={styles.deviceInfo}>
+                      <div className={styles.deviceName}>
+                        {getDeviceIcon(device.type)}
+                        {editMode[relayKey] ? (
+                          <div className={styles.editDeviceControls}>
+                            <input
+                              type="text"
+                              value={editData[device.relay_no]?.type || ""}
+                              onChange={(e) =>
+                                setEditData((prev) => ({
+                                  ...prev,
+                                  [device.relay_no]: { ...prev[device.relay_no], type: e.target.value },
+                                }))
+                              }
+                              className={styles.input}
+                              placeholder="Device Name"
+                            />
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleSaveEdit(device.relay_no)} className={styles.addButton}>
+                              Save
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleCancelEdit(device.relay_no)} className={styles.cancelButton}>
+                              Cancel
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleRemoveDevice(device.relay_no)} className={styles.removeButton}>
+                              Remove
+                            </motion.button>
+                          </div>
+                        ) : (
+                          <span>{device.type}</span>
+                        )}
+                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} className={styles.editButton} onClick={() => handleEditButtonClick(device.relay_no)}>
+                          <span className={styles.threeDots}>...</span>
+                        </motion.button>
+                      </div>
                     </div>
-                  </div>
-                  <div className={styles.deviceStatus}>
-                    <ToggleSwitch id={device.relay_no.toString()} checked={devices[relayKey]?.checked || false} onChange={() => handleToggle(device.relay_no)} />
-                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleOpenScheduleModal(device.relay_no)} className={styles.scheduleButton}>Schedule</motion.button>
-                  </div>
-                </motion.div>
-              );})}
+                    <div className={styles.deviceStatus}>
+                      <ToggleSwitch id={device.relay_no.toString()} checked={devices[relayKey]?.checked || false} onChange={() => handleToggle(device.relay_no)} />
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleOpenScheduleModal(device.relay_no)} className={styles.scheduleButton}>Schedule</motion.button>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </AnimatePresence>
           </div>
         )}

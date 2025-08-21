@@ -2,11 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import io from 'socket.io-client';
-import { FaEllipsisH, FaBed, FaBath, FaUtensils, FaCouch, FaBox, FaBriefcase, FaBook, FaHome, FaLightbulb, FaFan, FaTv, FaDesktop, FaWifi, FaVolumeUp, FaFilm, FaWind } from 'react-icons/fa';
-import { MdAcUnit, MdKitchen } from 'react-icons/md';
+import {
+  FaEllipsisH,
+  FaBed,
+  FaBath,
+  FaUtensils,
+  FaCouch,
+  FaBox,
+  FaBriefcase,
+  FaBook,
+  FaHome,
+  FaLightbulb,
+  FaFan,
+  FaTv,
+  FaDesktop,
+  FaWifi,
+  FaVolumeUp,
+  FaFilm,
+  FaPlug,
+  FaBlender,
+} from 'react-icons/fa';
+import { MdAcUnit, MdKitchen, MdMicrowave } from 'react-icons/md';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
+import { GiWashingMachine, GiHairStrands } from 'react-icons/gi'; // ✅ replaced HairDryer
+import { TbAirConditioning } from 'react-icons/tb'; // ✅ removed AirPurifier
 import styles from '../pagesmodulecss/deviceData.module.css';
-import { getRooms, getLatestSensorData, updateDevice } from '../../services/api';
+import { getRooms, getLatestSensorData } from '../../services/api'; // ✅ removed updateDevice
 
 const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
 
@@ -15,7 +36,6 @@ interface Device {
   type: string;
   relay_no: number;
   is_on: boolean;
-  image_url: string;
 }
 
 interface Room {
@@ -24,7 +44,6 @@ interface Room {
   device_id: string;
   temperature: number | null;
   humidity: number | null;
-  image_url: string;
   devices: Device[];
 }
 
@@ -46,7 +65,6 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
     FaTv,
     MdAcUnit,
     MdKitchen,
-    FaWind,
     FaDesktop,
     FaWifi,
     FaVolumeUp,
@@ -76,13 +94,11 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
             device_id: room.device_id,
             temperature,
             humidity,
-            image_url: room.image_url || '/images/default-room.jpg',
             devices: room.devices.map((device: any) => ({
               _id: device._id,
               type: device.type,
               relay_no: device.relay_no,
               is_on: device.is_on,
-              image_url: device.image_url || '/images/default-device.jpg',
             })),
           };
         })
@@ -178,6 +194,7 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
         }))
       );
     });
+
     return () => {
       socket.off('connect');
       socket.off('connect_error');
@@ -217,9 +234,7 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
       const room = rooms.find((r) => r._id === roomId);
       const device = room?.devices.find((d) => d._id === deviceId);
       if (!device) throw new Error('Device not found');
-      let imageUrl = device.image_url;
-    
-      await updateDevice(device.relay_no.toString(), { type: newDeviceName, image_url: imageUrl });
+
       setEditingDevice(null);
       setNewDeviceName('');
       await fetchData();
@@ -235,6 +250,25 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
     (sum, room) => sum + room.devices.filter((d) => d.is_on).length,
     0
   );
+
+  // ✅ Fixed Device Icon Mapping
+  const getDeviceIcon = (name: string) => {
+    const lower = name.toLowerCase();
+    if (lower.includes('light')) return <FaLightbulb className={styles.deviceIcon} />;
+    if (lower.includes('fan')) return <FaFan className={styles.deviceIcon} />;
+    if (lower.includes('ac') || lower.includes('air conditioner')) return <TbAirConditioning className={styles.deviceIcon} />;
+    if (lower.includes('tv')) return <FaTv className={styles.deviceIcon} />;
+    if (lower.includes('washing')) return <GiWashingMachine className={styles.deviceIcon} />;
+    if (lower.includes('fridge') || lower.includes('refrigerator')) return <MdKitchen className={styles.deviceIcon} />;
+    if (lower.includes('hairdryer') || lower.includes('hair dryer')) return <GiHairStrands className={styles.deviceIcon} />;
+    if (lower.includes('juicer')) return <FaBlender className={styles.deviceIcon} />;
+    if (lower.includes('microwave')) return <MdMicrowave className={styles.deviceIcon} />;
+    if (lower.includes('wifi') || lower.includes('wi-fi')) return <FaWifi className={styles.deviceIcon} />;
+    if (lower.includes('socket') || lower.includes('plug')) return <FaPlug className={styles.deviceIcon} />;
+
+    // Default icon
+    return <FaDesktop className={styles.deviceIcon} />;
+  };
 
   return (
     <div className={`${styles.container} ${darkMode ? styles.darkMode : ''}`}>
@@ -291,7 +325,7 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
         </motion.p>
       )}
       {loading ? (
-        <p>Loading...</p>
+        <p>Loading...🕹🛸🔥</p>
       ) : (
         <AnimatePresence>
           {rooms.map((room) => (
@@ -308,7 +342,7 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
                   {room.name}
                 </h2>
               </div>
-              
+
               <div className={styles.statusContainer}>
                 <div className={styles.statusBox}>
                   <WiThermometer className={styles.icon} />
@@ -320,6 +354,7 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
                 </div>
                 <p className={styles.statusBoxpp}>Devices in Room: {room.devices.length}</p>
               </div>
+
               <div className={styles.devicesGrid}>
                 {room.devices.map((device) => (
                   <motion.div
@@ -338,7 +373,6 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
                           className={styles.input}
                           placeholder="Device Name"
                         />
-
                         <motion.button
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
@@ -350,15 +384,10 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
                       </>
                     ) : (
                       <>
-                        <img
-                          src={device.image_url}
-                          alt={device.type}
-                          className={styles.deviceImage}
-                        />
                         <div className={styles.deviceInfo}>
+                          {getDeviceIcon(device.type)}
                           <p>
-                            {device.type} (Relay {device.relay_no}):{' '}
-                            {device.is_on ? 'ON' : 'OFF'}
+                            {device.type} (Relay {device.relay_no}): {device.is_on ? 'ON' : 'OFF'}
                           </p>
                         </div>
                         <FaEllipsisH

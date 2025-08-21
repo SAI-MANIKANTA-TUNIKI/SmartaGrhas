@@ -11,25 +11,21 @@
   position: relative;
   overflow: hidden;
 }
-
 .cloudy {
   background: linear-gradient(135deg, #d3d8e8 0%, #a8b7c7 100%);
   position: relative;
   overflow: hidden;
 }
-
 .rainy {
   background: linear-gradient(135deg, #4b6584 0%, #778ca3 100%);
   position: relative;
   overflow: hidden;
 }
-
 .snowy {
   background: linear-gradient(135deg, #e6ecef 0%, #b3c6d4 100%);
   position: relative;
   overflow: hidden;
 }
-
 .night {
   background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
   position: relative;
@@ -37,7 +33,6 @@
 }
 
 /* Particle animation container */
-
 .frostedGlass {
   border-radius: 20px;
   padding: 2rem;
@@ -45,7 +40,6 @@
   position: relative;
   z-index: 1;
 }
-
 .particle {
   position: absolute;
   font-size: 20px;
@@ -56,7 +50,6 @@
 .light {
   color: #333;
 }
-
 .dark {
   color: #fff;
   background: linear-gradient(135deg, #1a1a1a 0%, #2c3e50 100%);
@@ -70,7 +63,6 @@
   margin-bottom: 1rem;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
-
 .subtitle {
   font-size: 1.2rem;
   text-align: center;
@@ -78,7 +70,6 @@
   color: inherit;
   opacity: 0.8;
 }
-
 .searchBar {
   display: flex;
   justify-content: center;
@@ -86,7 +77,6 @@
   margin-bottom: 2rem;
   flex-wrap: wrap;
 }
-
 .searchInput {
   padding: 0.75rem 1rem;
   border: 1px solid rgba(0, 0, 0, 0.2);
@@ -97,13 +87,11 @@
   background: rgba(255, 255, 255, 0.9);
   color: #292929;
 }
-
 .searchInput:focus {
   outline: none;
   border-color: #007bff;
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
 }
-
 .searchButton,
 .locationButton {
   padding: 0.75rem 1.5rem;
@@ -115,7 +103,6 @@
   cursor: pointer;
   transition: background 0.3s ease;
 }
-
 .searchButton:hover,
 .locationButton:hover {
   background: #0056b3;
@@ -125,12 +112,10 @@
   text-align: center;
   margin-bottom: 2rem;
 }
-
 .header h1 {
   font-size: 2rem;
   font-weight: bold;
 }
-
 .header p {
   font-size: 1rem;
   color: inherit;
@@ -145,32 +130,27 @@
   margin-bottom: 2rem;
   padding: 2rem;
   border-radius: 12px;
- 
 }
-
 .temp h2 {
   font-size: 3rem;
   font-weight: bold;
 }
-
 .temp p {
   font-size: 1.2rem;
   text-transform: capitalize;
 }
-
 .weatherIcon {
   width: 100px;
   height: 100px;
 }
 
 .chartContainer {
- width: 70%;
+  width: 70%;
   padding: 2rem;
   border-radius: 12px;
   margin-bottom: 2rem;
   backdrop-filter: blur(2px);
 }
-
 .chartContainer h3 {
   font-size: 1.5rem;
   margin-bottom: 1rem;
@@ -182,7 +162,6 @@
   gap: 1rem;
   margin-bottom: 2rem;
 }
-
 .card {
   background: rgba(255, 255, 255, 0.171);
   padding: 1.5rem;
@@ -191,58 +170,72 @@
   backdrop-filter: blur(3px);
   transition: transform 0.3s ease;
 }
-
 .card:hover {
   transform: translateY(-5px);
 }
-
 .card h3 {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
 }
-
 .card p {
   font-size: 1rem;
   color: inherit;
 }
 
+/* --------- Weekly Forecast Section --------- */
 .weeklyForecast {
   background: rgba(255, 255, 255, 0.1);
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 12px;
   backdrop-filter: blur(3px);
+  margin-bottom: 2rem;
 }
-
 .weeklyForecast h2 {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   margin-bottom: 1rem;
+  text-align: center;
 }
 
 .forecastGridHorizontal {
   display: flex;
   gap: 1rem;
   overflow-x: auto;
-  padding-bottom: 1rem;
+  scrollbar-width: thin; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+  padding-bottom: 0.5rem;
+}
+.forecastGridHorizontal::-webkit-scrollbar {
+  height: 6px;
+}
+.forecastGridHorizontal::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
 }
 
 .dayCard {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.12);
   padding: 1rem;
-  border-radius: 8px;
+  border-radius: 10px;
   text-align: center;
-  min-width: 150px;
+  min-width: 120px;
+  max-width: 140px;
+  flex: 0 0 auto;
   backdrop-filter: blur(3px);
+  transition: transform 0.2s ease;
 }
-
+.dayCard:hover {
+  transform: translateY(-4px);
+}
 .dayCard h4 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 0.4rem;
 }
-
 .dayCard p {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
 }
 
+/* Loading and error states */
 .loading,
 .error {
   text-align: center;
@@ -256,18 +249,40 @@
   .title {
     font-size: 2rem;
   }
-
   .mainWeather {
     flex-direction: column;
     text-align: center;
   }
-
   .searchBar {
     flex-direction: column;
     align-items: center;
   }
-
   .searchInput {
     width: 100%;
+  }
+
+  .weeklyForecast {
+    padding: 1rem;
+  }
+  .weeklyForecast h2 {
+    font-size: 1.2rem;
+  }
+  .forecastGridHorizontal {
+    gap: 0.75rem;
+  }
+  .dayCard {
+    min-width: 90px;
+    max-width: 100px;
+    padding: 0.7rem;
+  }
+  .dayCard h4 {
+    font-size: 0.8rem;
+  }
+  .dayCard p {
+    font-size: 0.75rem;
+  }
+  .weatherIcon {
+    width: 60px;
+    height: 60px;
   }
 }

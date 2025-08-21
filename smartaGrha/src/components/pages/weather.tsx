@@ -286,12 +286,6 @@ const Weather: React.FC<WeatherProps> = ({ darkMode }) => {
             />
           </motion.div>
 
-          <motion.div className={styles.chartContainer} variants={cardVariants}>
-            <h3>Temperature Trend</h3>
-            <p>Weather Dashboard</p>
-            <Line data={chartData} />
-          </motion.div>
-
           <motion.div className={styles.weatherDetails} variants={containerVariants}>
             {[
               { label: 'Feels Like', value: `${Math.round(weather.main.feels_like)}°C`, icon: '🌡️' },
@@ -345,6 +339,13 @@ const Weather: React.FC<WeatherProps> = ({ darkMode }) => {
                 ))}
             </motion.div>
           </motion.div>
+          
+          <motion.div className={styles.chartContainer} variants={cardVariants}>
+            <h3>Temperature Trend</h3>
+            <p>Weather Dashboard</p>
+            <Line data={chartData} />
+          </motion.div>          
+
         </div>
       )}
     </div>  
