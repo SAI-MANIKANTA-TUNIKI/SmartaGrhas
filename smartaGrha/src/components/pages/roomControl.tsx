@@ -657,16 +657,6 @@ const RoomControl: React.FC<RoomProps> = ({ darkMode }) => {
       <div className={styles.container} style={{ position: "relative", zIndex: 1 }}>
         <header className={styles.header}>
           <h1 className={styles.headerTitle}>{currentRoom?.name || "Select a Room"} Control</h1>
-          {currentRoom && (
-            <div className={styles.headerControls}>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-                onClick={() => { setNewRoom({ name: currentRoom.name, esp32_ip: currentRoom.esp32_ip, device_id: currentRoom.device_id }); setIsEditRoomModalOpen(true); }}
-                className={styles.editButton}
-              >Edit Room</motion.button>
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleRemoveRoom} className={styles.removeButton}>Remove Room</motion.button>
-            </div>
-          )}
-
           <div className={styles.roomSwitchButtons}>
             {rooms.map((room) => (
               <motion.button key={room._id} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={() => handleRoomSwitch(room._id)} className={`${styles.roomButton} ${currentRoom?._id === room._id ? styles.activeRoom : ""}`}>
@@ -831,6 +821,19 @@ const RoomControl: React.FC<RoomProps> = ({ darkMode }) => {
             <p className={styles.deviceStatusText}>Devices On: {activeDevices}</p>
           </div>
         )}
+
+        <div>
+          {currentRoom && (
+            <div className={styles.headerControls}>
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                onClick={() => { setNewRoom({ name: currentRoom.name, esp32_ip: currentRoom.esp32_ip, device_id: currentRoom.device_id }); setIsEditRoomModalOpen(true); }}
+                className={styles.editButton}
+              >Edit Room</motion.button>
+              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={handleRemoveRoom} className={styles.removeButton}>Remove Room</motion.button>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );

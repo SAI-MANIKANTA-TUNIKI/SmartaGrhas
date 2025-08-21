@@ -5,10 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import io from "socket.io-client";
 import { FaCog } from "react-icons/fa";
 import styles from "../pagesmodulecss/notification.module.css";
-import { getNotifications, getUserPreferences, updateUserPreferences, getUserData } from "../../services/api";
+import {
+  getNotifications,
+  getUserPreferences,
+  updateUserPreferences,
+  getUserData,
+} from "../../services/api";
 
 const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
-
 
 interface Notification {
   _id: string;
@@ -26,8 +30,8 @@ interface NotificationDashboardProps {
 
 const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [filterDashboard, setFilterDashboard] = useState<string>(""); // Ensure no default filter
-  const [filterEventType, setFilterEventType] = useState<string>(""); // Ensure no default filter
+  const [filterDashboard, setFilterDashboard] = useState<string>("");
+  const [filterEventType, setFilterEventType] = useState<string>("");
   const [disabledEventTypes, setDisabledEventTypes] = useState<string[]>([]);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
@@ -52,7 +56,6 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
         eventType: filterEventType,
         limit: 50,
       });
-      console.log("Fetched notifications:", response.data.notifications);
       setNotifications(response.data.notifications);
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to fetch notifications");
@@ -68,7 +71,6 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
     try {
       const response = await getUserPreferences();
       const disabled = response.data.disabledEventTypes || [];
-      console.log("Fetched disabled event types:", disabled);
       setDisabledEventTypes(disabled);
       localStorage.setItem("disabledEventTypes", JSON.stringify(disabled));
     } catch (err) {
@@ -85,7 +87,7 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
     try {
       await updateUserPreferences(newDisabled);
       fetchNotifications();
-    } catch (err) {
+    } catch {
       setError("Failed to update preferences");
     }
   };
@@ -101,8 +103,7 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
     const joinSocketRoom = async () => {
       try {
         const userResponse = await getUserData();
-        const userId = userResponse.data.id; // Adjust if userId
-        console.log("Joining socket room for user:", userId);
+        const userId = userResponse.data.id;
         socket.emit("join", userId);
       } catch (err) {
         console.error("Failed to fetch user data for socket join:", err);
@@ -111,38 +112,36 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
 
     joinSocketRoom();
 
-    socket.on("connect", () => {
-      console.log("Socket.IO connected with ID:", socket.id);
-    });
-
     socket.on("connect_error", (err) => {
-      console.error("Socket.IO connection error:", err.message);
       setError("Failed to connect to real-time updates");
+      console.error("Socket.IO error:", err.message);
     });
 
     socket.on("notification", (notification: Notification) => {
-      console.log("Received socket notification:", notification);
       if (
         (!filterDashboard || notification.dashboard === filterDashboard) &&
         (!filterEventType || notification.eventType === filterEventType) &&
         !disabledEventTypes.includes(notification.eventType)
       ) {
         setNotifications((prev) => [notification, ...prev].slice(0, 50));
-      } else {
-        console.log("Notification filtered out:", { filterDashboard, filterEventType, disabledEventTypes });
       }
     });
 
     return () => {
-      socket.off("connect");
       socket.off("connect_error");
       socket.off("notification");
     };
   }, [filterDashboard, filterEventType]);
 
   return (
-    <div className={`${styles.container} ${darkMode ? styles.darkMode : ""}`}>
+    <motion.div
+      className={`${styles.container} ${darkMode ? styles.darkMode : ""}`}
+      initial={{ opacity: 0, y: -30 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+    >
       <h1 className={styles.title}>Notification Dashboard</h1>
+
       <div className={styles.controls}>
         <div className={styles.filters}>
           <div className={styles.filterGroup}>
@@ -191,39 +190,60 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
           <FaCog /> Settings
         </motion.button>
       </div>
-      {showSettings && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          className={styles.settingsPanel}
-        >
-          <h3>Notification Settings</h3>
-          <p>Disable notifications for specific event types:</p>
-          <div className={styles.eventTypeList}>
-            {eventTypes.map((eventType) => (
-              <label key={eventType} className={styles.eventTypeItem}>
-                <input
-                  type="checkbox"
-                  checked={disabledEventTypes.includes(eventType)}
-                  onChange={() => handleToggleEventType(eventType)}
-                />
-                {eventType}
-              </label>
-            ))}
-          </div>
-        </motion.div>
-      )}
+
+      <AnimatePresence>
+        {showSettings && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={styles.settingsPanel}
+          >
+            <h3>Notification Settings</h3>
+            <p>Disable notifications for specific event types:</p>
+            <div className={styles.eventTypeList}>
+              {eventTypes.map((eventType) => (
+                <label key={eventType} className={styles.eventTypeItem}>
+                  <input
+                    type="checkbox"
+                    checked={disabledEventTypes.includes(eventType)}
+                    onChange={() => handleToggleEventType(eventType)}
+                  />
+                  {eventType}
+                </label>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {error && (
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className={styles.error}>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className={styles.error}
+        >
           {error}
         </motion.p>
       )}
+
       {loading ? (
         <p>Loading...</p>
       ) : (
         <AnimatePresence>
-          <div className={styles.notificationList}>
+          <motion.div
+            className={styles.notificationList}
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: { opacity: 1 },
+              show: {
+                opacity: 1,
+                transition: { staggerChildren: 0.1 },
+              },
+            }}
+          >
             {notifications.length === 0 ? (
               <p>No notifications found.</p>
             ) : (
@@ -231,9 +251,12 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
                 <motion.div
                   key={notification._id}
                   className={styles.notificationCard}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
+                  variants={{
+                    hidden: { opacity: 0, y: 30 },
+                    show: { opacity: 1, y: 0 },
+                  }}
+                  exit={{ opacity: 0, y: 30 }}
+                  transition={{ type: "spring", stiffness: 70, damping: 12 }}
                 >
                   <div className={styles.notificationHeader}>
                     <h3>{notification.dashboard}</h3>
@@ -251,10 +274,10 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
                 </motion.div>
               ))
             )}
-          </div>
+          </motion.div>
         </AnimatePresence>
       )}
-    </div>
+    </motion.div>
   );
 };
 

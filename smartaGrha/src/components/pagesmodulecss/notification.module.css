@@ -1,139 +1,127 @@
 .container {
-  max-width: 1200px;
+  padding: 2rem;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
-  font-family: Arial, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .darkMode {
-  background-color: #1a1a1a;
-  color: #ffffff;
+  background: #121212;
+  color: #eaeaea;
 }
 
 .title {
   font-size: 2rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
   text-align: center;
-  margin-bottom: 20px;
 }
 
 .controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
 .filters {
   display: flex;
-  gap: 20px;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  font-size: 0.9rem;
 }
 
 .select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  background-color: #fff;
+  padding: 0.5rem;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 0.9rem;
+  transition: border 0.2s;
 }
 
-.darkMode .select {
-  background-color: #333;
-  border-color: #555;
-  color: #fff;
+.select:focus {
+  border-color: #007bff;
 }
 
 .settingsButton {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 8px 12px;
-  background-color: #007bff;
+  background: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 500;
+  transition: background 0.2s;
 }
 
-.darkMode .settingsButton {
-  background-color: #0056b3;
+.settingsButton:hover {
+  background: #0056b3;
 }
 
 .settingsPanel {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
-  margin-bottom: 20px;
-}
-
-.darkMode .settingsPanel {
-  background-color: #2a2a2a;
-  border-color: #444;
-}
-
-.settingsPanel h3 {
-  margin: 0 0 10px;
-  font-size: 1.2rem;
+  background: rgba(0, 123, 255, 0.05);
+  border: 1px solid #007bff30;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .eventTypeList {
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .eventTypeItem {
   display: flex;
   align-items: center;
-  gap: 10px;
-}
-
-.error {
-  color: red;
-  text-align: center;
-  margin-bottom: 20px;
+  gap: 0.5rem;
 }
 
 .notificationList {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: grid;
+  gap: 1rem;
 }
 
 .notificationCard {
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background-color: #f9f9f9;
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.notificationCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 
 .darkMode .notificationCard {
-  background-color: #2a2a2a;
-  border-color: #444;
+  background: #1e1e1e;
+  color: #ddd;
 }
 
 .notificationHeader {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
-.notificationHeader h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.notificationHeader span {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.darkMode .notificationHeader span {
-  color: #aaa;
+.error {
+  color: #d9534f;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }

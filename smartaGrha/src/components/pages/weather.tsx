@@ -312,14 +312,14 @@ const Weather: React.FC<WeatherProps> = ({ darkMode }) => {
 
           <motion.div className={styles.weeklyForecast} variants={cardVariants}>
             <h2>This Week</h2>
-            <motion.div className={styles.forecastGridHorizontal} drag="x" dragConstraints={{ left: -200, right: 0 }}>
+            <motion.div className={styles.forecastGridHorizontal} drag="x" dragConstraints={{ left: -250, right: 0 }}>
               <div className={styles.dayCard}>
                 <h4>Today</h4>
                 <p>Now: {Math.round(weather.main.temp)}°</p>
               </div>
               {forecast
                 .filter((_, index) => index % 8 === 0)
-                .slice(0, 6)
+                .slice(0, 8)
                 .map((day, index) => (
                   <motion.div key={index} className={styles.dayCard} variants={cardVariants}>
                     <h4>

@@ -96,7 +96,7 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ duration: 0.6 }}
         >
-          ⚡ Power Supply Dashboard ⚡
+        ⚡Power-Supply-Dashboard⚡
         </motion.h2>
 
         <div className={styles.controls}>
@@ -125,7 +125,7 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
               <h2>Total Usage</h2>
               <p className={styles.usageValue}>{totalPower.toFixed(2)} kWh</p>
               <p className={styles.usageChange}>
-                {totalPower > 200 ? '🔺 12% Increase' : '🔻 8% Decrease'} from last period
+                {totalPower > 200 ? '🔺 12% Increase' : '🔻 4% Decrease'} from last period
               </p>
             </div>
             <ResponsiveContainer width="100%" height={300}>
