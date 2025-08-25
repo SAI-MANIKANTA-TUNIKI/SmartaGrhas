@@ -87,6 +87,7 @@ const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
 });
 
+// FIXED: Removed unused diskStorage; using memoryStorage directly
 const upload = multer({
   storage: multer.memoryStorage(), // Use memory to buffer, then upload to S3
   fileFilter: (req, file, cb) => {
@@ -162,7 +163,6 @@ app.use((req, res, next) => {
   req.io = io;
   next();
 });
-
 
 // AWS setup
 AWS.config.update({
@@ -304,69 +304,49 @@ const handleMqttMessages = async () => {
           device_id,
           metadata: { temperature, humidity },
         };
-// Inside handleMqttMessages, replace the relay handling block with this:        
       } else if (topicParts[1] === "esp32" && topicParts[3].startsWith("relay")) {
         const device_id = topicParts[2];
         const relay_no = parseInt(topicParts[3].replace("relay", ""));
         const { is_on } = data;
-  // Validate payload       
         if (typeof is_on !== "boolean" || isNaN(relay_no)) {
           console.error(`Invalid relay payload for topic ${topic}:`, data);
           return;
         }
-  // Find the room with the specified device_id and relay_no       
         const room = await roomModel.findOne({ device_id, "devices.relay_no": relay_no });
         if (!room) {
           console.error(`Room not found for device_id: ${device_id}, relay_no: ${relay_no}`);
           return;
         }
- // Ensure room has a userId
-if (!room.userId) {
-    console.error(`No userId found for room with device_id: ${device_id}, relay_no: ${relay_no}`);
-    return;
-  }
-  // Find the device within the room
-   const device = room.devices.find((d) => d.relay_no === relay_no);
-  if (!device) {
-    console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
-    return;
-  }
-    // Check if the device state has changed
-  if (device.is_on === is_on) {
-    console.log(`State unchanged for Device=${device_id}, Relay=${relay_no}, is_on=${is_on}`);
-    return;
-  }
-        
-        if (device && device.is_on !== is_on) {
-            // Update device state and save
-          device.is_on = is_on;
-          await room.save();
-          // Emit device update via Socket.IO
-          io.to(room.userId.toString()).emit("deviceUpdated", {
-            userId: room.userId,
-            roomId: room._id,
-            device: { ...device, _id: device.relay_no },
-          });
-               // Create notification
-             const notificationData = {
-             userId: room.userId,
-             dashboard: "RoomControl",
-              eventType: "DeviceStatus",
-               description: `${device.type} in ${room.name} turned ${is_on ? "ON" : "OFF"}`,
-              device_id,
-             metadata: { relay_no, is_on },
-             };
-             const notification = await createNotification(notificationData);
-             if (notification) {
-              io.to(notification.userId.toString()).emit("notification", notification);
-              console.log("Emitted notification:", notification);
-             }
-        } else {
-          console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
+        if (!room.userId) {
+          console.error(`No userId found for room with device_id: ${device_id}, relay_no: ${relay_no}`);
+          return;
         }
+        const device = room.devices.find((d) => d.relay_no === relay_no);
+        if (!device) {
+          console.error(`Device not found: Device=${device_id}, Relay=${relay_no}`);
+          return;
+        }
+        if (device.is_on === is_on) {
+          console.log(`State unchanged for Device=${device_id}, Relay=${relay_no}, is_on=${is_on}`);
+          return;
+        }
+        device.is_on = is_on;
+        await room.save();
+        io.to(room.userId.toString()).emit("deviceUpdated", {
+          roomId: room._id,
+          device: { ...device, _id: device.relay_no },
+        });
+        notificationData = {
+          userId: room.userId,
+          dashboard: "RoomControl",
+          eventType: "DeviceStatus",
+          description: `${device.type} in ${room.name} turned ${is_on ? "ON" : "OFF"}`,
+          device_id,
+          metadata: { relay_no, is_on },
+        };
       } else if (topicParts[1] === "camera") {
         const camera_id = topicParts[2];
-        const camera = await cameraModel.findOne({ name: camera_id }); // Adjust based on your Camera model
+        const camera = await cameraModel.findOne({ name: camera_id });
         if (!camera) {
           console.error(`Camera not found for id: ${camera_id}`);
           return;
@@ -496,7 +476,6 @@ io.on("connection", (socket) => {
   });
 });
 
-
 // Routes
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
@@ -548,16 +527,10 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
-// Start schedule checker
-startScheduleChecker(io);
-// Start sensor data cleanup
-startSensorDataCleanup(); // Add this line
-// Add this line to start notification cleanup
-startNotificationCleanup();
-// Start MQTT message handling
-handleMqttMessages();
-
-    // Start server
+    startScheduleChecker(io);
+    startSensorDataCleanup();
+    startNotificationCleanup();
+    handleMqttMessages();
     server.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
@@ -567,5 +540,4 @@ handleMqttMessages();
   }
 };
 
-// Start the server
 startServer();
