@@ -386,59 +386,69 @@ const Weather: React.FC<WeatherProps> = ({ darkMode }) => {
     [forecast]
   );
 
-  const chartOptions = useMemo(() => {
-    const isDark = darkMode;
-    const grid = isDark
-      ? 'rgba(240, 237, 231, 0.06)'
-      : 'rgba(23, 22, 20, 0.06)';
-    const axis = isDark ? '#7d7871' : '#8a8681';
-    const ink = isDark ? '#f0ede7' : '#0e0e0c';
+import type { ChartOptions } from 'chart.js';
 
-    return {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index' as const, intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: isDark ? '#1a1917' : '#ffffff',
-          borderColor: grid,
-          borderWidth: 1,
-          titleColor: axis,
-          bodyColor: ink,
-          padding: 10,
-          titleFont: { family: 'JetBrains Mono', size: 10, weight: '500' as const },
-          bodyFont: { family: 'JetBrains Mono', size: 12, weight: '500' as const },
-          displayColors: false,
-          callbacks: {
-            label: (ctx: any) => `${Math.round(ctx.parsed.y)}°C`,
-          },
+const chartOptions: ChartOptions<'line'> = useMemo(() => {
+  const isDark = darkMode;
+  const grid = isDark
+    ? 'rgba(240, 237, 231, 0.06)'
+    : 'rgba(23, 22, 20, 0.06)';
+  const axis = isDark ? '#7d7871' : '#8a8681';
+  const ink = isDark ? '#f0ede7' : '#0e0e0c';
+
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: isDark ? '#1a1917' : '#ffffff',
+        borderColor: grid,
+        borderWidth: 1,
+        titleColor: axis,
+        bodyColor: ink,
+        padding: 10,
+        titleFont: {
+          family: 'JetBrains Mono',
+          size: 10,
+          weight: 500,          // ← number, not string
+        },
+        bodyFont: {
+          family: 'JetBrains Mono',
+          size: 12,
+          weight: 500,          // ← number, not string
+        },
+        displayColors: false,
+        callbacks: {
+          label: (ctx) => `${Math.round(ctx.parsed.y)}°C`,
         },
       },
-      scales: {
-        x: {
-          grid: { display: false },
-          border: { color: grid },
-          ticks: {
-            color: axis,
-            font: { family: 'JetBrains Mono', size: 10 },
-            maxRotation: 0,
-            autoSkipPadding: 20,
-          },
-        },
-        y: {
-          grid: { color: grid, drawTicks: false },
-          border: { display: false },
-          ticks: {
-            color: axis,
-            font: { family: 'JetBrains Mono', size: 10 },
-            padding: 8,
-            callback: (v: any) => `${Math.round(v)}°`,
-          },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { color: grid },
+        ticks: {
+          color: axis,
+          font: { family: 'JetBrains Mono', size: 10 },
+          maxRotation: 0,
+          autoSkipPadding: 20,
         },
       },
-    };
-  }, [darkMode]);
+      y: {
+        grid: { color: grid, drawTicks: false },
+        border: { display: false },
+        ticks: {
+          color: axis,
+          font: { family: 'JetBrains Mono', size: 10 },
+          padding: 8,
+          callback: (v) => `${Math.round(Number(v))}°`,
+        },
+      },
+    },
+  };
+}, [darkMode]);
 
   /* Weekly — pick one per day */
   const week = useMemo(() => {
