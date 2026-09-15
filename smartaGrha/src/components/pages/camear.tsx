@@ -13,7 +13,7 @@ interface FeedProps {
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
-const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction, darkMode }) => {
+const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
