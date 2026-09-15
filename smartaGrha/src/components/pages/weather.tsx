@@ -678,7 +678,7 @@ const Weather: React.FC<WeatherProps> = ({ darkMode }) => {
                     label: 'Coordinates',
                     value: `${weather.coord.lat.toFixed(2)}, ${weather.coord.lon.toFixed(2)}`,
                   },
-                ].map((d, i) => (
+                ].map((d) => (
                   <motion.div
                     key={d.label}
                     className={styles.detail}
