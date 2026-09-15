@@ -69,7 +69,7 @@ const SettingsPage: React.FC<SettingsPageProps> = ({
     }
   };
 
-  const iconColor = darkMode ? '%23f0ede7' : '%230e0e0c';
+  //const iconColor = darkMode ? '%23f0ede7' : '%230e0e0c';
 
   return (
     <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
