@@ -1,239 +1,972 @@
-/* ===============================
-   PowerSuplay.module.css
-   Butterfly-inspired UI
-   =============================== */
+/* ==================================================================
+   PowerSuplay — Electricity dashboard
+   Language : "Warm Paper" (matches homeDashboard / deviceData / camear)
+   Aesthetic: editorial spec-sheet · tabular data · mono metadata
+   ================================================================== */
 
-/* ===== Base Themes ===== */
-.lightMode {
-  background: linear-gradient(135deg, #fdfcfb, #e2d1c3);
-  color: #333;
-  min-height: 100vh;
-  padding: 20px;
-  font-family: 'Poppins', sans-serif;
-}
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
-.darkMode {
-  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
-  color: #fff;
-  min-height: 100vh;
-  padding: 20px;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* ===== Container ===== */
+/* ------------------------------------------------------------------
+   1. TOKENS — LIGHT
+   ------------------------------------------------------------------ */
 .container {
+  /* Type */
+  --font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Surfaces */
+  --bg: #f4f1ec;
+  --bg-elev: #fbf9f5;
+  --bg-card: #ffffff;
+  --bg-inset: #f7f4ef;
+  --border: #e8e3da;
+  --border-strong: #d9d2c4;
+  --rule: rgba(23, 22, 20, 0.08);
+  --rule-strong: rgba(23, 22, 20, 0.14);
+
+  /* Ink */
+  --ink: #0e0e0c;
+  --ink-2: #4a4844;
+  --ink-3: #8a8681;
+  --ink-4: #b4afa7;
+
+  /* Signature accent — terracotta (consumption) */
+  --accent: #c96442;
+  --accent-soft: rgba(201, 100, 66, 0.12);
+  --accent-border: rgba(201, 100, 66, 0.30);
+
+  /* Efficiency — sage */
+  --sage: #5c8068;
+  --sage-soft: rgba(92, 128, 104, 0.10);
+  --sage-border: rgba(92, 128, 104, 0.32);
+
+  /* Warning — amber */
+  --amber: #a8842e;
+  --amber-soft: rgba(168, 132, 46, 0.12);
+  --amber-border: rgba(168, 132, 46, 0.30);
+
+  /* Chart colors (kept in sync with TSX) */
+  --chart-grid: rgba(23, 22, 20, 0.06);
+  --chart-axis: #8a8681;
+  --chart-1: #c96442;
+  --chart-2: #6b8e78;
+  --chart-3: #c19a3e;
+  --chart-4: #8c6a8e;
+  --chart-5: #5b7a94;
+  --chart-6: #b06b7a;
+  --chart-7: #7a8a5c;
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(23, 22, 20, 0.04);
+  --shadow-sm: 0 4px 14px -6px rgba(23, 22, 20, 0.12);
+  --shadow-md: 0 16px 40px -18px rgba(23, 22, 20, 0.22);
+
+  /* Layout */
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  width: 100%;
+  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.15rem, 4vw, 4rem)
+           clamp(4rem, 8vw, 7rem);
+  box-sizing: border-box;
+  overflow-x: clip;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--bg);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01' on, 'cv11' on, 'tnum' on, 'case' on;
+  transition: background 0.5s ease, color 0.5s ease;
+}
+
+/* Paper grain */
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.42;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.055 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Masked grid, top-down */
+.container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(23, 22, 20, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(23, 22, 20, 0.03) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(180deg, black 0%, transparent 55%);
+  -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 55%);
+}
+
+/* ------------------------------------------------------------------
+   2. DARK MODE
+   ------------------------------------------------------------------ */
+.darkMode {
+  --bg: #0e0d0c;
+  --bg-elev: #161513;
+  --bg-card: #1a1917;
+  --bg-inset: #121110;
+  --border: #26241f;
+  --border-strong: #3a3733;
+  --rule: rgba(240, 237, 231, 0.07);
+  --rule-strong: rgba(240, 237, 231, 0.14);
+
+  --ink: #f0ede7;
+  --ink-2: #b6b1a8;
+  --ink-3: #7d7871;
+  --ink-4: #524f4a;
+
+  --accent: #e07856;
+  --accent-soft: rgba(224, 120, 86, 0.14);
+  --accent-border: rgba(224, 120, 86, 0.32);
+
+  --sage: #8fb098;
+  --sage-soft: rgba(143, 176, 152, 0.12);
+  --sage-border: rgba(143, 176, 152, 0.34);
+
+  --amber: #d9b062;
+  --amber-soft: rgba(217, 176, 98, 0.14);
+  --amber-border: rgba(217, 176, 98, 0.32);
+
+  --chart-grid: rgba(240, 237, 231, 0.06);
+  --chart-axis: #7d7871;
+  --chart-1: #e07856;
+  --chart-2: #8fb098;
+  --chart-3: #e0b562;
+  --chart-4: #a785ad;
+  --chart-5: #7fa3c0;
+  --chart-6: #cf8a99;
+  --chart-7: #9aad7c;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 4px 18px -8px rgba(0, 0, 0, 0.55);
+  --shadow-md: 0 22px 55px -22px rgba(0, 0, 0, 0.75);
+}
+
+.darkMode::before {
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
+
+.darkMode::after {
+  background-image:
+    linear-gradient(to right, rgba(240, 237, 231, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(240, 237, 231, 0.035) 1px, transparent 1px);
+}
+
+/* ------------------------------------------------------------------
+   3. HEADER
+   ------------------------------------------------------------------ */
+.header {
+  position: relative;
+  z-index: 2;
   max-width: 1400px;
-  margin: 0 auto;
-}
+  margin: 0 auto 1.75rem;
 
-/* ===== Title ===== */
-.title {
-  text-align: center;
-  font-size: 2.5rem;
-  font-weight: 600;
-  background: linear-gradient(90deg, #ff7eb3, #65d6ce, #f6d365);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 30px;
-}
-
-/* ===== Time Range Controls ===== */
-.controls {
   display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 25px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.title {
+  position: relative;
+  margin: 0;
+  padding-left: 1.15rem;
+
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3.6vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+
+  border-left: 3px solid var(--accent);
+}
+
+.title::before {
+  content: 'Consumption · Realtime';
+  display: block;
+  margin-bottom: 0.55rem;
+
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.subtitle {
+  margin: 0.35rem 0 0;
+  font-family: var(--font-body);
+  font-size: 0.94rem;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+}
+
+/* ------------------------------------------------------------------
+   4. SEGMENTED CONTROL (time range)
+   ------------------------------------------------------------------ */
+.controls {
+  position: relative;
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
+  box-shadow: var(--shadow-xs);
+  flex-shrink: 0;
 }
 
 .button {
-  padding: 10px 18px;
-  border-radius: 25px;
+  position: relative;
+  padding: 0.5rem 1rem;
   border: none;
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(6px);
-  font-weight: 500;
+  background: transparent;
+  border-radius: 8px;
   cursor: pointer;
-  color: inherit;
-  transition: all 0.3s ease;
+
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-3);
+  isolation: isolate;
+
+  transition: color 0.25s ease;
 }
 
 .button:hover {
-  background: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
+  color: var(--ink);
 }
 
-.active {
-  background: linear-gradient(90deg, #ff7eb3, #65d6ce);
-  color: white;
-  box-shadow: 0 4px 15px rgba(255, 126, 179, 0.4);
+.button.active {
+  color: var(--ink);
+  font-weight: 600;
 }
 
-/* ===== Charts Layout ===== */
-.charts {
+/* The sliding pill; animated by framer-motion via layoutId */
+.buttonIndicator {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-xs);
+}
+
+/* ------------------------------------------------------------------
+   5. HERO STAT STRIP
+   ------------------------------------------------------------------ */
+.heroStat {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: center;
+
+  padding: clamp(1.5rem, 2.6vw, 2rem) clamp(1.4rem, 2.6vw, 2rem);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+}
+
+.heroLeft {
   display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.heroLabel {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.heroValue {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
   flex-wrap: wrap;
-  gap: 25px;
-  justify-content: center;
+
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5.6vw, 4rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.heroUnit {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+}
+
+.heroDelta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  width: fit-content;
+
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+.heroDeltaUp {
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.heroDeltaDown {
+  border: 1px solid var(--sage-border);
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+/* Right column — secondary stats list */
+.heroRight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding-left: 2rem;
+  border-left: 1px solid var(--rule);
+}
+
+.heroStatLine {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.heroStatLabel {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 450;
+  color: var(--ink-3);
+  letter-spacing: -0.005em;
+}
+
+.heroStatValue {
+  font-family: var(--font-mono);
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------
+   6. CHARTS GRID
+   ------------------------------------------------------------------ */
+.charts {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 1rem;
 }
 
 .chartBox {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(12px);
-  border-radius: 20px;
-  padding: 20px;
-  flex: 1 1 450px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
+  overflow: hidden;
+
+  padding: 1.35rem 1.4rem 1rem;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .chartBox:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
-/* ===== Total Usage ===== */
-.totalUsage {
-  text-align: center;
-  margin-bottom: 20px;
-  max-width:max-content;
+.chartHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--rule);
 }
 
-.usageValue {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #ff7eb3;
+.chartTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
 }
 
-.usageChange {
-  font-size: 0.9rem;
-  opacity: 0.8;
+.chartMeta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
-/* ===== Summary Section ===== */
+/* Recharts container — ensures crisp layout */
+.chartBody {
+  width: 100%;
+  min-height: 300px;
+}
+
+/* ------------------------------------------------------------------
+   7. RECHARTS TOOLTIP (rendered by TSX)
+   ------------------------------------------------------------------ */
+.tooltip {
+  padding: 0.6rem 0.75rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  color: var(--ink);
+  min-width: 140px;
+}
+
+.tooltipLabel {
+  margin-bottom: 0.35rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--rule);
+
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.tooltipRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tooltipDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.tooltipName {
+  color: var(--ink-2);
+  font-size: 0.78rem;
+}
+
+.tooltipValue {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------------
+   8. BREAKDOWN (spec-sheet rows with bars)
+   ------------------------------------------------------------------ */
 .summary {
-  margin-top: 30px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+
+  padding: clamp(1.4rem, 2.4vw, 1.85rem);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
 }
 
 .summary h4 {
-  margin-bottom: 15px;
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.breakdownRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(80px, 2fr) auto auto;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.85rem 0;
+
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.25s ease;
+}
+
+.breakdownRow:last-child {
+  border-bottom: none;
+}
+
+.breakdownRow:hover {
+  background: var(--bg-inset);
+  margin: 0 -0.5rem;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  border-radius: 8px;
+}
+
+.breakdownName {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: -0.008em;
+  color: var(--ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.breakdownBar {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--bg-inset);
+  overflow: hidden;
+}
+
+.breakdownBarFill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform-origin: left center;
+}
+
+.breakdownPercent {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 3.5rem;
+}
+
+.breakdownValue {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 4.5rem;
+}
+
+.breakdownTotal {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--rule-strong);
+
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.breakdownTotalValue {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
   font-weight: 600;
-  background: linear-gradient(90deg, #65d6ce, #f6d365);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.03em;
+  text-transform: none;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
 }
 
-.summary p {
-  margin: 5px 0;
-  font-size: 0.95rem;
-}
-
-/* ===== Device Status Table ===== */
+/* ------------------------------------------------------------------
+   9. DEVICE TABLE
+   ------------------------------------------------------------------ */
 .deviceStatus {
-  margin-top: 30px;
-  overflow-x: auto;
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+
+  padding: clamp(1.4rem, 2.4vw, 1.85rem);
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+}
+
+.deviceStatus h4 {
+  margin: 0 0 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
 .statusTable {
   width: 100%;
   border-collapse: collapse;
-  border-radius: 15px;
-  overflow: hidden;
-  background: rgba(255, 255, 255, 0.08);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
 }
 
-.statusTable th,
-.statusTable td {
-  padding: 12px 15px;
+.statusTable thead th {
+  padding: 0 1rem 0.85rem 0;
   text-align: left;
+
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-bottom: 1px solid var(--rule-strong);
 }
 
-.statusTable th {
-  background: rgba(255, 255, 255, 0.15);
-  font-weight: 600;
+.statusTable thead th:last-child {
+  padding-right: 0;
+  text-align: right;
 }
 
-.statusTable tr {
-  transition: background 0.3s ease;
+.statusTable tbody tr {
+  border-bottom: 1px solid var(--rule);
+  transition: background 0.25s ease;
 }
 
-.statusTable tr:hover {
-  background: rgba(255, 255, 255, 0.12);
+.statusTable tbody tr:last-child {
+  border-bottom: none;
 }
 
+.statusTable tbody tr:hover {
+  background: var(--bg-inset);
+}
 
-/* ===== Responsive ===== */
-@media (max-width: 1024px) {
+.statusTable td {
+  padding: 0.95rem 1rem 0.95rem 0;
+  vertical-align: middle;
+  color: var(--ink-2);
+  letter-spacing: -0.005em;
+}
+
+.statusTable td:first-child {
+  font-weight: 500;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.statusTable td:last-child {
+  padding-right: 0;
+  text-align: right;
+}
+
+/* Numeric column */
+.statusTable .num {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------
+   10. STATUS PILL
+   ------------------------------------------------------------------ */
+.statusPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.statusPill .pillDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.statusActive {
+  border: 1px solid var(--sage-border);
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+.statusActive .pillDot {
+  box-shadow: 0 0 0 0 var(--sage-border);
+  animation: pulseActive 2.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseActive {
+  0%, 100% { box-shadow: 0 0 0 0 var(--sage-border); }
+  50%      { box-shadow: 0 0 0 5px transparent; }
+}
+
+.statusInactive {
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  color: var(--ink-3);
+}
+
+.statusNotStarted {
+  border: 1px solid var(--amber-border);
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+/* ------------------------------------------------------------------
+   11. LOADING SKELETON
+   ------------------------------------------------------------------ */
+.skeletonWrap {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.skeletonBlock {
+  height: 140px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    90deg,
+    var(--bg-elev) 25%,
+    var(--bg-inset) 50%,
+    var(--bg-elev) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+.skeletonBlock.tall {
+  height: 340px;
+}
+
+@keyframes shimmer {
+  to { background-position: -200% 0; }
+}
+
+/* ------------------------------------------------------------------
+   12. RESPONSIVE
+   ------------------------------------------------------------------ */
+@media (max-width: 1100px) {
   .charts {
-    gap: 18px;
+    grid-template-columns: 1fr;
   }
 
-  .chartBox {
-    flex: 1 1 100%;
-    min-width: 100%;
+  .heroStat {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .heroRight {
+    padding-left: 0;
+    padding-top: 1.25rem;
+    border-left: none;
+    border-top: 1px solid var(--rule);
   }
 }
 
-@media (max-width: 768px) {
-  .charts {
+@media (max-width: 720px) {
+  .container {
+    padding: 2rem 1rem 4rem;
+  }
+
+  .header {
     flex-direction: column;
     align-items: stretch;
-    gap: 20px;
   }
 
-  .chartBox {
-    flex: 1 1 100%;
-    width: 100%;
-    min-width: unset;
-    padding: 15px;
-  }
-
-  .totalUsage h2 {
-    font-size: 1.4rem;
-  }
-
-  .usageValue {
-    font-size: 1.6rem;
-  }
-
-  .usageChange {
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 480px) {
   .title {
-    font-size: 1.6rem;
-    margin-bottom: 20px;
+    padding-left: 0.9rem;
   }
 
   .controls {
-    flex-wrap: wrap;
-    gap: 8px;
+    align-self: flex-start;
+    overflow-x: auto;
+    max-width: 100%;
   }
 
   .button {
-    padding: 8px 14px;
-    font-size: 0.8rem;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.68rem;
   }
 
-  .chartBox {
-    padding: 12px;
-    border-radius: 15px;
+  .breakdownRow {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.75rem;
   }
 
-  .usageValue {
-    font-size: 1.4rem;
+  .breakdownBar {
+    display: none;
   }
 
-  .summary p {
-    font-size: 0.85rem;
+  .breakdownValue {
+    min-width: 4rem;
   }
 }
 
+@media (max-width: 520px) {
+  .heroValue {
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+
+  .heroStat {
+    padding: 1.35rem 1.25rem;
+  }
+
+  .statusTable thead {
+    display: none;
+  }
+
+  .statusTable,
+  .statusTable tbody,
+  .statusTable tr,
+  .statusTable td {
+    display: block;
+    width: 100%;
+  }
+
+  .statusTable tr {
+    padding: 0.9rem 0;
+  }
+
+  .statusTable td {
+    padding: 0.2rem 0;
+    text-align: left !important;
+  }
+
+  .statusTable td:first-child {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .statusTable td:nth-child(2) {
+    font-family: var(--font-display);
+    font-size: 1.02rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+}
+
+/* ------------------------------------------------------------------
+   13. A11Y & POLISH
+   ------------------------------------------------------------------ */
+.button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.container ::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.container::-webkit-scrollbar { width: 10px; }
+.container::-webkit-scrollbar-track { background: transparent; }
+.container::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--border-strong);
+  border: 3px solid var(--bg);
+  background-clip: padding-box;
+}
+.container::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+  background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container *,
+  .container *::before,
+  .container *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
