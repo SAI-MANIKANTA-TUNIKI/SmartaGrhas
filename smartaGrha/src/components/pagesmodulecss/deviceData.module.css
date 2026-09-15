@@ -1,222 +1,777 @@
+/* ==================================================================
+   DeviceData — Room & Device Monitoring
+   Design language: "Warm Paper" (matches homeDashboard.module.css)
+   Aesthetic:  editorial product studio · paper + ink + terracotta
+   ================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;450;500;600&display=swap');
+
+/* ------------------------------------------------------------------
+   1. TOKENS — LIGHT (default)
+   ------------------------------------------------------------------ */
 .container {
+  /* Type */
+  --font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Surfaces */
+  --bg: #f4f1ec;
+  --bg-elev: #fbf9f5;
+  --bg-card: #ffffff;
+  --border: #e8e3da;
+  --border-strong: #d9d2c4;
+
+  /* Ink */
+  --ink: #171614;
+  --ink-2: #4a4844;
+  --ink-3: #8a8681;
+
+  /* Signature accent — burnt terracotta */
+  --accent: #c96442;
+  --accent-soft: rgba(201, 100, 66, 0.14);
+  --accent-border: rgba(201, 100, 66, 0.28);
+
+  /* "Active" state — muted sage */
+  --sage: #5c8068;
+  --sage-soft: rgba(92, 128, 104, 0.12);
+  --sage-border: rgba(92, 128, 104, 0.30);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(23, 22, 20, 0.05);
+  --shadow-sm: 0 2px 10px -2px rgba(23, 22, 20, 0.07);
+  --shadow-md: 0 16px 40px -16px rgba(23, 22, 20, 0.18);
+
+  /* Layout */
   position: relative;
-  padding: 20px;
+  isolation: isolate;
   min-height: 100vh;
-  overflow: hidden;
+  width: 100%;
+  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.25rem, 4vw, 4rem)
+           clamp(4rem, 8vw, 7rem);
+  box-sizing: border-box;
+  overflow-x: clip;
+
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--ink);
+  background: var(--bg);
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01' on, 'cv11' on, 'tnum' on;
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
+/* Paper grain — same texture as homeDashboard */
+.container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.055 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Faint grid, masked at top */
+.container::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    linear-gradient(to right, rgba(23, 22, 20, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(23, 22, 20, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 55% at 50% 0%, black 0%, transparent 78%);
+}
+
+/* ------------------------------------------------------------------
+   2. DARK MODE
+   ------------------------------------------------------------------ */
 .darkMode {
-  background-color: #1e1e1e;
-  color: #ffffff;
+  --bg: #0f0e0d;
+  --bg-elev: #161513;
+  --bg-card: #1a1917;
+  --border: #2a2825;
+  --border-strong: #3a3733;
+
+  --ink: #f0ede7;
+  --ink-2: #b6b1a8;
+  --ink-3: #7d7871;
+
+  --accent: #e07856;
+  --accent-soft: rgba(224, 120, 86, 0.16);
+  --accent-border: rgba(224, 120, 86, 0.34);
+
+  --sage: #8fb098;
+  --sage-soft: rgba(143, 176, 152, 0.14);
+  --sage-border: rgba(143, 176, 152, 0.34);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 12px -2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
 }
 
+.darkMode::before {
+  mix-blend-mode: screen;
+  opacity: 0.5;
+}
 
+.darkMode::after {
+  background-image:
+    linear-gradient(to right, rgba(240, 237, 231, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(240, 237, 231, 0.04) 1px, transparent 1px);
+}
+
+/* ------------------------------------------------------------------
+   3. FLOATING BACKGROUND ICONS
+   ------------------------------------------------------------------ */
+.background {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
 
 .floatingIcon {
   position: absolute;
-  font-size: 3rem;
-  opacity: 0.15;
-  color: #66f026;
+  width: clamp(34px, 4vw, 54px);
+  height: clamp(34px, 4vw, 54px);
+  display: grid;
+  place-items: center;
+  color: var(--ink-3);
   pointer-events: auto;
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-  transition: filter 0.3s ease;
+  will-change: transform, opacity;
+}
+
+/* react-icons render as <svg>; we tint + fade them via the child */
+.floatingIcon > svg {
+  width: 100%;
+  height: 100%;
+  opacity: 0.085;
+  transition: opacity 0.35s ease, color 0.35s ease, filter 0.35s ease;
 }
 
 .floatingIcon:hover {
-  filter: drop-shadow(0 0 10px rgba(255, 255, 0, 0.8));
+  color: var(--accent);
 }
 
-.darkMode .floatingIcon {
-  color: #bbbbbb;
-  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+.floatingIcon:hover > svg {
+  opacity: 0.32;
+  filter: drop-shadow(0 0 12px var(--accent-soft));
 }
 
-.darkMode .floatingIcon:hover {
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
-}
-
+/* ------------------------------------------------------------------
+   4. PAGE TITLE
+   ------------------------------------------------------------------ */
 .title {
-  font-size: 2.6rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #a18cd1, #fbc2eb, #84fab0);
-  background-size: 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 6s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-
-
-.summary {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
   position: relative;
   z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto 1.75rem;
+  padding-left: 1.1rem;
+
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 4vw, 3.1rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+  text-wrap: balance;
+
+  /* Small accent rule on the left */
+  border-left: 3px solid var(--accent);
 }
 
+/* Eyebrow injected above the title, no JSX change needed */
+.title::before {
+  content: 'Live monitoring';
+  display: block;
+  margin-bottom: 0.55rem;
+
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------
+   5. SUMMARY STRIP
+   ------------------------------------------------------------------ */
+.summary {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  max-width: 1120px;
+  margin: 0 auto clamp(2.25rem, 4vw, 3.5rem);
+  padding-left: 1.1rem; /* aligns with the title rule */
+}
 
 .summary p {
-  font-size: 1.2rem;
-  color: #b700ff;
+  margin: 0;
+  padding: 0.5rem 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+
+  transition: border-color 0.3s ease, color 0.3s ease,
+              background 0.3s ease, transform 0.3s ease;
 }
 
+.summary p:hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+  transform: translateY(-1px);
+}
+
+/* Emphasize the numeric part visually via a subtle inner glow */
+.summary p:nth-child(3) {
+  border-color: var(--sage-border);
+  background: var(--sage-soft);
+  color: var(--sage);
+}
+
+/* ------------------------------------------------------------------
+   6. ERROR BANNER
+   ------------------------------------------------------------------ */
 .error {
-  color: red;
-  text-align: center;
-  margin-bottom: 10px;
   position: relative;
   z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto 1.5rem;
+  padding: 0.9rem 1.1rem 0.9rem 1.1rem;
+
+  border-radius: 12px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  box-shadow: var(--shadow-xs);
 }
 
+/* ------------------------------------------------------------------
+   7. ROOM CONTAINER
+   ------------------------------------------------------------------ */
 .roomContainer {
-  margin-bottom: 20px;
-  padding: 15px;
-  border: 1px solid #636363;
-  border-radius: 8px;
   position: relative;
   z-index: 1;
+  max-width: 1120px;
+  margin: 0 auto 1.25rem;
+  padding: clamp(1.4rem, 2.4vw, 1.9rem);
+
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+
+  will-change: transform;
+  transition:
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
 }
 
+.roomContainer:hover {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
+}
 
+/* ------------------------------------------------------------------
+   8. ROOM HEADER
+   ------------------------------------------------------------------ */
 .roomHeader {
   display: flex;
   align-items: center;
-  margin-bottom: 10px;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.2rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .roomTitle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  font-size: 1.5rem;
+  gap: 0.85rem;
+  margin: 0;
+
+  font-family: var(--font-display);
+  font-size: clamp(1.15rem, 1.9vw, 1.5rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  color: var(--ink);
 }
 
+/* The room icon — svg rendered by react-icons */
 .roomIcon {
-  margin-right: 10px;
-  font-size: 1.5rem;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  padding: 9px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--ink-2);
+
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 0.35s ease,
+              color 0.35s ease;
 }
 
+.roomContainer:hover .roomIcon {
+  transform: rotate(-4deg) scale(1.04);
+  border-color: var(--border-strong);
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------------
+   9. STATUS ROW (Temperature / Humidity / Device count)
+   ------------------------------------------------------------------ */
 .statusContainer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  color: #ff7b00;
-}
-.statusBoxpp{
- display: flex;
-  align-items: center;
-  font-size: 1rem;
-  color: #8800f8;
-  font-weight: bold;
-}
-.statusBox p {
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-  color: #8800f8;
-  font-weight: bold;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.7rem;
+  margin-bottom: 1.4rem;
 }
 
+.statusBox,
+.statusBoxpp {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0.55rem 0.9rem 0.55rem 0.75rem;
+
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  transition: border-color 0.3s ease, color 0.3s ease,
+              background 0.3s ease;
+}
+
+.statusBox:hover,
+.statusBoxpp:hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+/* The Wi* icon inside the status pill */
+.statusBox .icon,
 .icon {
-  font-size: 1.5rem;
-  margin-right: 5px;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--ink-3);
+  transition: color 0.3s ease;
 }
 
+.statusBox:hover .icon {
+  color: var(--accent);
+}
+
+/* The device-count chip gets a slightly different treatment */
+.statusBoxpp {
+  border-style: dashed;
+  background: transparent;
+  color: var(--ink-3);
+  font-weight: 450;
+}
+
+/* ------------------------------------------------------------------
+   10. DEVICE GRID
+   ------------------------------------------------------------------ */
 .devicesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 0.75rem;
 }
 
+/* ------------------------------------------------------------------
+   11. DEVICE CARD
+   ------------------------------------------------------------------ */
 .deviceCard {
-  padding: 10px;
-  border: 1px solid #cccccc;
-  border-radius: 4px;
-  text-align: center;
-  transition: transform 0.2s ease;
   position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+
+  padding: 0.85rem 0.95rem 0.85rem 0.85rem;
+  border-radius: 13px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+
+  cursor: pointer;
+  will-change: transform, border-color, box-shadow;
+
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
+}
+
+/* Soft radial sheen that appears on hover */
+.deviceCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(120% 100% at 0% 0%,
+                              var(--accent-soft), transparent 65%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
 .deviceCard:hover {
-  transform: scale(1.02);
+  transform: translateY(-2px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
-
-.on {
-
-  border-color: #7bff00;
+.deviceCard:hover::after {
+  opacity: 1;
 }
 
-.darkMode .on {
-  
-  border-color: #73ff00;
+/* --- STATE: OFF (default / muted) --- */
+.deviceCard.off {
+  background: var(--bg-card);
 }
 
-.off {
-  border-color: #ff0000;
+.deviceCard.off .deviceIcon {
+  background: var(--bg-elev);
+  border-color: var(--border);
+  color: var(--ink-3);
 }
 
-.darkMode .off {
-  border-color: #ff0400;
+/* --- STATE: ON (sage accent) --- */
+.deviceCard.on {
+  border-color: var(--sage-border);
+  background: linear-gradient(180deg, var(--bg-card), var(--sage-soft));
 }
 
-.deviceIcon {
-  font-size: 1.5rem;
-  margin-right: 8px;
-  color: var(--primary-color, #4cafef);
-  vertical-align: middle;
-}
-
-
-.deviceInfo {
-  font-size: 0.9rem;
-}
-
-.editIcon {
+.deviceCard.on::before {
+  content: '';
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 50%;
+  right: 0;
+  width: 3px;
+  height: 60%;
+  transform: translateY(-50%);
+  border-radius: 3px 0 0 3px;
+  background: var(--sage);
+  box-shadow: 0 0 14px var(--sage-border);
+  animation: onGlow 2.6s ease-in-out infinite;
+}
+
+.deviceCard.on .deviceIcon {
+  background: var(--sage-soft);
+  border-color: var(--sage-border);
+  color: var(--sage);
+  box-shadow: 0 0 0 4px var(--sage-soft);
+}
+
+@keyframes onGlow {
+  0%, 100% { opacity: 0.85; box-shadow: 0 0 12px var(--sage-border); }
+  50%      { opacity: 1;    box-shadow: 0 0 22px var(--sage-border); }
+}
+
+/* --- Device info block: icon + label --- */
+.deviceInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0; /* allow truncation */
+  flex: 1 1 auto;
+}
+
+.deviceInfo p {
+  margin: 0;
+  min-width: 0;
+
+  font-family: var(--font-body);
+  font-size: 0.855rem;
+  font-weight: 500;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.deviceCard.on .deviceInfo p {
+  color: var(--ink);
+}
+
+/* --- Device icon (svg from react-icons) --- */
+.deviceIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--ink-3);
+
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 0.35s ease,
+              border-color 0.35s ease,
+              color 0.35s ease,
+              box-shadow 0.35s ease;
+}
+
+.deviceCard:hover .deviceIcon {
+  transform: translateY(-1px) rotate(-3deg) scale(1.06);
+}
+
+/* --- Ellipsis menu --- */
+.editIcon {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  padding: 7px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  color: var(--ink-3);
+  opacity: 0;
   cursor: pointer;
-  font-size: 1rem;
-  color: #666666;
+  transition: opacity 0.3s ease, color 0.3s ease, background 0.3s ease,
+              transform 0.3s ease;
 }
 
-.darkMode .editIcon {
-  color: #cccccc;
+.deviceCard:hover .editIcon,
+.deviceCard:focus-within .editIcon {
+  opacity: 1;
 }
 
+.editIcon:hover {
+  background: var(--bg-elev);
+  color: var(--accent);
+  transform: rotate(90deg);
+}
+
+/* Touch devices: always show the menu */
+@media (hover: none) {
+  .editIcon { opacity: 1; }
+}
+
+/* ------------------------------------------------------------------
+   12. EDIT MODE — input + save
+   ------------------------------------------------------------------ */
 .input {
-  width: 100%;
-  padding: 5px;
-  margin-bottom: 10px;
-  border: 1px solid #cccccc;
-  border-radius: 4px;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0.55rem 0.75rem;
+
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  background: var(--bg-elev);
+
+  border-radius: 9px;
+  border: 1px solid var(--border-strong);
+  outline: none;
+
+  transition: border-color 0.25s ease, box-shadow 0.25s ease,
+              background 0.25s ease;
 }
 
-.darkMode .input {
-  border-color: #555555;
-  background-color: #333333;
-  color: #ffffff;
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.input:focus {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
 .saveButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
+  flex-shrink: 0;
+  padding: 0.55rem 0.95rem;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: var(--ink);
+  color: var(--bg);
+
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
   cursor: pointer;
-  width: 100%;
-  transition: background-color 0.2s ease;
+
+  transition: background 0.25s ease, transform 0.25s ease,
+              box-shadow 0.25s ease, color 0.25s ease;
 }
 
 .saveButton:hover {
-  background-color: #0056b3;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 6px 18px -6px var(--accent-border);
+}
+
+.saveButton:active {
+  transform: translateY(1px);
+}
+
+.saveButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ------------------------------------------------------------------
+   13. RESPONSIVE
+   ------------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .container {
+    padding: 2rem 1.25rem 4.5rem;
+  }
+
+  .devicesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+
+  .background {
+    opacity: 0.6;
+  }
+
+  .roomContainer {
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 560px) {
+  .title {
+    font-size: clamp(1.6rem, 8vw, 2rem);
+    padding-left: 0.85rem;
+  }
+
+  .title::before {
+    font-size: 0.68rem;
+  }
+
+  .summary {
+    padding-left: 0.85rem;
+    gap: 0.45rem;
+  }
+
+  .summary p {
+    font-size: 0.78rem;
+    padding: 0.42rem 0.75rem;
+  }
+
+  .devicesGrid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .statusContainer {
+    gap: 0.5rem;
+  }
+
+  .statusBox,
+  .statusBoxpp {
+    font-size: 0.8rem;
+    padding: 0.48rem 0.75rem 0.48rem 0.65rem;
+  }
+
+  .deviceCard {
+    padding: 0.75rem 0.8rem 0.75rem 0.75rem;
+  }
+
+  .roomIcon {
+    width: 34px;
+    height: 34px;
+    padding: 8px;
+  }
+
+  .background {
+    opacity: 0.4;
+  }
+}
+
+/* ------------------------------------------------------------------
+   14. ACCESSIBILITY & POLISH
+   ------------------------------------------------------------------ */
+.deviceCard:focus-visible,
+.roomContainer:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.container ::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+.container::-webkit-scrollbar {
+  width: 10px;
+}
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.container::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: var(--border-strong);
+  border: 3px solid var(--bg);
+  background-clip: padding-box;
+}
+.container::-webkit-scrollbar-thumb:hover {
+  background: var(--ink-3);
+  background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .container *,
+  .container *::before,
+  .container *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
