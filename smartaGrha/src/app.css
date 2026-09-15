@@ -1,41 +1,104 @@
-/* App.css */
+/* ==================================================================
+   App shell — layout only.
+   All visual styling lives in page module CSS files.
+   ================================================================== */
 
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
-body.dark-mode {
-  background-color: #121212;
-  color: #fff;
+/* Main content area — grows to fill the viewport below the navbar */
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
 }
 
-/* Adjust other elements based on dark mode */
-.app.darkMode {
-  background-color: #121212;
-  color: #fff;
+/* Wrapper for animated route transitions */
+.app-route {
+  min-height: 100%;
+  width: 100%;
 }
 
-/* Define dark mode overrides for specific elements if necessary */
-.darkMode .profileButton {
-  background-color: #333;
-  color: #fff;
+/* ------------------------------------------------------------------
+   Profile button (fallback for any component still using the
+   global `.profileButton` class rather than its module)
+   ------------------------------------------------------------------ */
+.profileButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.95rem;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--paper-card);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    color 0.25s ease;
 }
 
-/* You can also use CSS variables for easier theming */
-:root {
-  --bg-color-light: #fff;
-  --bg-color-dark: #121212;
-  --text-color-light: #000;
-  --text-color-dark: #fff;
+.profileButton:hover {
+  border-color: var(--border-strong);
+  background: var(--paper-inset);
 }
 
-/* Apply them in your app */
-body {
-  background-color: var(--bg-color-light);
-  color: var(--text-color-light);
+body.dark-mode .profileButton {
+  background: var(--paper-card);
+  color: var(--ink);
 }
 
-body.dark-mode {
-  background-color: var(--bg-color-dark);
-  color: var(--text-color-dark);
+/* ------------------------------------------------------------------
+   Skip link (a11y) — tab to reveal
+   ------------------------------------------------------------------ */
+.skip-link {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 999;
+  padding: 0.5rem 0.85rem;
+  border-radius: 6px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ------------------------------------------------------------------
+   Toast container — matches the Warm Paper palette
+   ------------------------------------------------------------------ */
+.Toastify__toast {
+  font-family: var(--font-body) !important;
+  font-size: 0.88rem !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border) !important;
+}
+
+.Toastify__toast--success {
+  background: var(--sage-soft) !important;
+  color: var(--sage) !important;
+  border-color: var(--sage-border) !important;
+}
+
+.Toastify__toast--error {
+  background: var(--accent-soft) !important;
+  color: var(--accent) !important;
+  border-color: var(--accent-border) !important;
 }
