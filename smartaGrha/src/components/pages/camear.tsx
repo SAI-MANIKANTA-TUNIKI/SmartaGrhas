@@ -1,208 +1,133 @@
-// frontend/src/components/pages/camear.tsx
+// src/Components/pages/camear.tsx
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from '../pagesmodulecss/camear.module.css';
 import { getCameras, addCamera } from '../../services/api';
 
-interface Camera {
-  _id: string;
-  name: string;
-  ip: string;
-  userId: string;
-}
-
-interface CameraProps {
-  darkMode: boolean;
-}
-
+interface Camera { _id: string; name: string; ip: string; userId: string; }
+interface CameraProps { darkMode: boolean; }
 interface FeedProps {
-  camera: Camera;
-  isPlaying: boolean;
-  action: string;
-  setAction: (action: string) => void;
-  darkMode: boolean;
+  camera: Camera; isPlaying: boolean; action: string;
+  setAction: (action: string) => void; darkMode: boolean;
 }
 
-const CameraFeed: React.FC<FeedProps> = ({
-  camera,
-  isPlaying,
-  action,
-  setAction,
-  darkMode,
-}) => {
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+
+const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction, darkMode }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
-
-  const width = 600;
-  const height = 400;
+  const width = 600; const height = 400;
 
   useEffect(() => {
     if (isPlaying && imgRef.current) {
-      const mjpegUrl = `http://localhost:5000/stream?ip=${encodeURIComponent(
-        camera.ip
-      )}`;
-
+      const mjpegUrl = `http://localhost:5000/stream?ip=${encodeURIComponent(camera.ip)}`;
       imgRef.current.src = mjpegUrl;
       imgRef.current.crossOrigin = 'anonymous';
-
-      imgRef.current.onerror = () => {
-        setStreamError(`Failed to load MJPEG stream from ${camera.name}.`);
-      };
-
+      imgRef.current.onerror = () => setStreamError(`Failed to load stream from ${camera.name}.`);
       imgRef.current.onload = () => setStreamError(null);
     } else if (imgRef.current) {
       imgRef.current.src = '';
     }
-
-    return () => {
-      if (imgRef.current) imgRef.current.src = '';
-    };
+    return () => { if (imgRef.current) imgRef.current.src = ''; };
   }, [isPlaying, camera.ip]);
 
   useEffect(() => {
     let drawing = false;
-
     const drawLoop = () => {
       if (!isPlaying || !drawing || !imgRef.current?.complete) return;
-
       const ctx = canvasRef.current?.getContext('2d');
-
-      if (ctx && imgRef.current) {
-        ctx.drawImage(imgRef.current, 0, 0, width, height);
-      }
-
+      if (ctx && imgRef.current) ctx.drawImage(imgRef.current, 0, 0, width, height);
       requestAnimationFrame(drawLoop);
     };
-
-    if (isPlaying) {
-      drawing = true;
-      drawLoop();
-    }
-
-    return () => {
-      drawing = false;
-    };
+    if (isPlaying) { drawing = true; drawLoop(); }
+    return () => { drawing = false; };
   }, [isPlaying]);
 
   useEffect(() => {
-    if (action === 'snapshot') {
-      takeSnapshot();
-      setAction('none');
-    } else if (action === 'download') {
-      startRecording();
-      setAction('none');
-    }
+    if (action === 'snapshot') { takeSnapshot(); setAction('none'); }
+    else if (action === 'download') { startRecording(); setAction('none'); }
   }, [action]);
 
   const takeSnapshot = () => {
     if (canvasRef.current && imgRef.current?.complete) {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
-
       if (ctx) {
-        canvas.width = width;
-        canvas.height = height;
-
+        canvas.width = width; canvas.height = height;
         ctx.drawImage(imgRef.current, 0, 0, width, height);
-
-        const data = canvas.toDataURL('image/png');
-
         const a = document.createElement('a');
-        a.href = data;
+        a.href = canvas.toDataURL('image/png');
         a.download = `${camera.name}-snapshot.png`;
         a.click();
       }
-    } else {
-      setStreamError('No stream available');
-    }
+    } else setStreamError('No stream available');
   };
 
   const startRecording = () => {
     if (canvasRef.current && imgRef.current?.complete) {
       const canvas = canvasRef.current;
       const stream = canvas.captureStream(25);
-
-      const recorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm',
-      });
-
+      const recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
       const chunks: Blob[] = [];
       const ctx = canvas.getContext('2d');
-
       const drawFrame = () => {
         if (!ctx || !imgRef.current?.complete) return;
-
-        canvas.width = width;
-        canvas.height = height;
-
+        canvas.width = width; canvas.height = height;
         ctx.drawImage(imgRef.current, 0, 0, width, height);
-
         requestAnimationFrame(drawFrame);
       };
-
       drawFrame();
-
       recorder.ondataavailable = (e) => chunks.push(e.data);
-
       recorder.onstop = () => {
-        const blob = new Blob(chunks, {
-          type: 'video/webm',
-        });
-
+        const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
-
         const a = document.createElement('a');
-        a.href = url;
-        a.download = `${camera.name}-video.webm`;
+        a.href = url; a.download = `${camera.name}-video.webm`;
         a.click();
       };
-
       recorder.start();
-
       setTimeout(() => recorder.stop(), 10000);
-    } else {
-      setStreamError('No stream available');
-    }
+    } else setStreamError('No stream available');
   };
 
   return (
     <motion.div
-      className={`${styles.feedContainer} ${
-        darkMode ? styles.dark : ''
-      }`}
-      whileHover={{ scale: 1.02 }}
-      transition={{
-        type: 'spring',
-        stiffness: 200,
-        damping: 15,
-      }}
+      className={styles.feed}
+      layout
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.98 }}
+      transition={{ duration: 0.5, ease: EASE }}
     >
-      {streamError && (
-        <div className={styles.error}>{streamError}</div>
-      )}
+      <div className={styles.feedFrame}>
+        <canvas ref={canvasRef} width={width} height={height} className={styles.canvas} />
+        <img ref={imgRef} style={{ display: 'none' }} alt="" />
 
-      <canvas
-        ref={canvasRef}
-        width={width}
-        height={height}
-        className={styles.canvas}
-      />
+        {streamError && (
+          <div className={styles.feedError}>
+            <span className={styles.feedErrorDot} />
+            {streamError}
+          </div>
+        )}
 
-      <img
-        ref={imgRef}
-        style={{ display: 'none' }}
-        alt="hidden stream"
-      />
+        {/* Live indicator */}
+        {isPlaying && !streamError && (
+          <div className={styles.liveTag}>
+            <motion.span
+              className={styles.liveDot}
+              animate={{ opacity: [1, 0.35, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            LIVE
+          </div>
+        )}
+      </div>
 
-      <motion.div
-        className={styles.feedInfo}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <h2>{camera.name}</h2>
-      </motion.div>
+      <div className={styles.feedBar}>
+        <span className={styles.feedName}>{camera.name}</span>
+        <span className={styles.feedIp}>{camera.ip}</span>
+      </div>
     </motion.div>
   );
 };
@@ -216,277 +141,177 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [_error, setError] = useState<string | null>(null);
 
-  // CCTV-themed icons from Iconify
-  const cctvIcons = [
-    'mdi:cctv',
-    'mdi:webcam',
-    'mdi:security',
-    'mdi:motion-sensor',
-    'mdi:video',
-    'mdi:camera',
-    'mdi:camera-wireless',
-    'mdi:camera-outline',
-    'mdi:sparkle',
-  ];
-
   const refetchCameras = async () => {
     try {
       const response = await getCameras();
-
       setCameras(response.data);
-
-      if (
-        response.data.length > 0 &&
-        selectedIndex >= response.data.length
-      ) {
-        setSelectedIndex(0);
-      }
-
+      if (response.data.length > 0 && selectedIndex >= response.data.length) setSelectedIndex(0);
       setError(null);
-    } catch {
-      setError('Failed to fetch cameras.');
-    }
+    } catch { setError('Failed to fetch cameras.'); }
   };
 
-  useEffect(() => {
-    refetchCameras();
-  }, []);
+  useEffect(() => { refetchCameras(); }, []);
 
   const handleAddCamera = async () => {
     const name = prompt('Enter Camera Name');
-
-    let ip = prompt(
-      'Enter Camera IP Address (e.g., 192.168.1.15)'
-    );
-
+    let ip = prompt('Enter Camera IP Address (e.g., 192.168.1.15)');
     if (name && ip) {
-      ip = ip
-        .replace(/^http:\/\//, '')
-        .replace(/\/stream$/, '');
-
+      ip = ip.replace(/^http:\/\//, '').replace(/\/stream$/, '');
       try {
         await addCamera({ name, ip });
-
         await refetchCameras();
-
         alert('Camera added successfully!');
-      } catch {
-        setError('Failed to add camera.');
-      }
+      } catch { setError('Failed to add camera.'); }
     }
   };
 
   const cols = Math.ceil(Math.sqrt(viewMode));
   const rows = Math.ceil(viewMode / cols);
-
   const visibleCameras =
-    viewMode === 1 && cameras.length > 0
-      ? [cameras[selectedIndex]]
-      : cameras.slice(0, viewMode);
+    viewMode === 1 && cameras.length > 0 ? [cameras[selectedIndex]] : cameras.slice(0, viewMode);
+
+  const iconColor = darkMode ? '%23f0ede7' : '%230e0e0c';
 
   return (
-    <div
-      className={`${styles.container} ${
-        darkMode ? styles.dark : ''
-      }`}
-    >
-      {/* Background Animated Icons */}
-      <div className={styles.backgroundIcons}>
-        {Array.from({ length: 12 }).map((_, index) => {
-          const icon =
-            cctvIcons[
-              Math.floor(Math.random() * cctvIcons.length)
-            ];
-
-          return (
-            <motion.div
-              key={index}
-              className={styles.iconItem}
-              style={{
-                top: `${Math.random() * 90}%`,
-                left: `${Math.random() * 90}%`,
-              }}
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: [0.2, 0.4, 0.2],
-                y: [0, -15, 0],
-                rotate: [0, 5, -5, 0],
-                scale: [1, 1.05, 1],
-              }}
-              transition={{
-                duration: 5 + Math.random() * 5,
-                repeat: Infinity,
-                repeatType: 'reverse',
-                ease: 'easeInOut',
-                delay: Math.random() * 2,
-              }}
-              whileHover={{
-                scale: 1.2,
-                rotate: 0,
-                opacity: 0.8,
-                transition: { duration: 0.3 },
-              }}
-            >
-              <img
-                src={`https://api.iconify.design/${icon}.svg?color=${
-                  darkMode ? '%23ffffff' : '%23888888'
-                }`}
-                alt={icon}
-                className={styles.deviceIcon}
-              />
-
-              {icon === 'mdi:sparkle' && (
-                <div className={styles.smokeEffect}></div>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <motion.div
-        className={styles.header}
-        initial={{ y: -50, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{
-          type: 'spring',
-          stiffness: 80,
-        }}
-      >
-        <div className={styles.title}>
-          <h1>📹 LiveView Hub</h1>
-          <p>Camera Monitoring System</p>
+    <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
+      {/* ---------- Top bar ---------- */}
+      <header className={styles.topbar}>
+        <div>
+          <p className={styles.eyebrow}>Security · Cameras</p>
+          <h1 className={styles.title}>LiveView Hub</h1>
         </div>
 
-        <div className={styles.buttons}>
+        <div className={styles.toolbar}>
           <motion.button
-            whileTap={{ scale: 0.9 }}
-            className={styles.addButton}
+            className={styles.ghostBtn}
+            onClick={() => setShowSettings(!showSettings)}
+            whileTap={{ scale: 0.96 }}
+          >
+            <img src={`https://api.iconify.design/mdi:tune.svg?color=${iconColor}`} alt="" width={14} height={14} />
+            Controls
+          </motion.button>
+          <motion.button
+            className={styles.primaryBtn}
             onClick={handleAddCamera}
+            whileTap={{ scale: 0.96 }}
           >
-            + Add Camera
-          </motion.button>
-
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            className={styles.settingsButton}
-            onClick={() =>
-              setShowSettings(!showSettings)
-            }
-          >
-            ⚙ Settings
+            <img src={`https://api.iconify.design/mdi:plus.svg?color=${darkMode ? '%230e0e0c' : '%23f0ede7'}`} alt="" width={14} height={14} />
+            Add camera
           </motion.button>
         </div>
-      </motion.div>
+      </header>
 
-      <AnimatePresence>
+      {/* ---------- Control drawer ---------- */}
+      <AnimatePresence initial={false}>
         {showSettings && (
-          <motion.div
-            className={styles.settingsPanel}
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
+          <motion.section
+            className={styles.drawer}
+            initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+            animate={{ opacity: 1, height: 'auto', marginBottom: '1.5rem' }}
+            exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+            transition={{ duration: 0.4, ease: EASE }}
+            style={{ overflow: 'hidden' }}
           >
-            <button
-              onClick={() =>
-                document
-                  .getElementById('grid')
-                  ?.requestFullscreen()
-              }
-            >
-              Fullscreen
-            </button>
+            <div className={styles.drawerInner}>
+              <div className={styles.drawerGroup}>
+                <span className={styles.drawerLabel}>Playback</span>
+                <button
+                  className={styles.chip}
+                  onClick={() => document.getElementById('grid')?.requestFullscreen()}
+                >
+                  Fullscreen
+                </button>
+                <button
+                  className={`${styles.chip} ${!isPlaying ? styles.chipActive : ''}`}
+                  onClick={() => setIsPlaying(!isPlaying)}
+                >
+                  {isPlaying ? 'Pause' : 'Resume'}
+                </button>
+              </div>
 
-            <button
-              onClick={() =>
-                setIsPlaying(!isPlaying)
-              }
-            >
-              {isPlaying ? 'Pause' : 'Play'}
-            </button>
+              <div className={styles.drawerGroup}>
+                <span className={styles.drawerLabel}>Capture</span>
+                <button className={styles.chip} onClick={() => setAction('snapshot')}>Snapshot</button>
+                <button className={styles.chip} onClick={() => setAction('download')}>Record 10s</button>
+              </div>
 
-            <button
-              onClick={() => setAction('snapshot')}
-            >
-              Snapshot 📸
-            </button>
-
-            <button
-              onClick={() => setAction('download')}
-            >
-              Download Video ⬇️
-            </button>
-
-            <select
-              value={viewMode}
-              onChange={(e) =>
-                setViewMode(parseInt(e.target.value))
-              }
-            >
-              {[1, 2, 4, 8, 16].map((n) => (
-                <option key={n} value={n}>
-                  {n} Frames
-                </option>
-              ))}
-            </select>
-          </motion.div>
+              <div className={styles.drawerGroup}>
+                <span className={styles.drawerLabel}>Grid</span>
+                {[1, 2, 4, 8, 16].map((n) => (
+                  <button
+                    key={n}
+                    className={`${styles.chip} ${viewMode === n ? styles.chipActive : ''}`}
+                    onClick={() => setViewMode(n)}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.section>
         )}
       </AnimatePresence>
 
-      <div className={styles.mainContent}>
+      {/* ---------- Main ---------- */}
+      <div className={styles.main}>
         <motion.div
           id="grid"
-          className={styles.cameraGrid}
+          className={styles.grid}
           style={{
-            display: 'grid',
             gridTemplateColumns: `repeat(${cols}, 1fr)`,
             gridTemplateRows: `repeat(${rows}, 1fr)`,
           }}
           layout
         >
-          {visibleCameras.map((cam) => (
-            <CameraFeed
-              key={cam._id}
-              camera={cam}
-              isPlaying={isPlaying}
-              action={action}
-              setAction={setAction}
-              darkMode={darkMode}
-            />
-          ))}
+          <AnimatePresence mode="popLayout">
+            {visibleCameras.map((cam) => (
+              <CameraFeed
+                key={cam._id}
+                camera={cam}
+                isPlaying={isPlaying}
+                action={action}
+                setAction={setAction}
+                darkMode={darkMode}
+              />
+            ))}
+          </AnimatePresence>
         </motion.div>
 
-        <div className={styles.cameraList}>
-          <h3>Camera List</h3>
+        <aside className={styles.sidebar}>
+          <header className={styles.sidebarHead}>
+            <span>Cameras</span>
+            <span className={styles.sidebarCount}>{cameras.length}</span>
+          </header>
 
-          {cameras.map((camera, index) => (
-            <motion.div
-              key={camera._id}
-              className={`${styles.cameraItem} ${
-                viewMode === 1 &&
-                selectedIndex === index
-                  ? styles.selected
-                  : ''
-              }`}
-              whileHover={{ scale: 1.03 }}
-              onClick={() => setSelectedIndex(index)}
-            >
-              <img
-                src={`http://localhost:5000/stream?ip=${encodeURIComponent(
-                  camera.ip
-                )}`}
-                alt={camera.name}
-                className={styles.cameraThumbnail}
-                crossOrigin="anonymous"
-                onError={(e) =>
-                  (e.currentTarget.style.display = 'none')
-                }
-              />
-
-              <span>{camera.name}</span>
-            </motion.div>
-          ))}
-        </div>
+          <ul className={styles.camList}>
+            {cameras.map((camera, index) => {
+              const isSelected = viewMode === 1 && selectedIndex === index;
+              return (
+                <li key={camera._id}>
+                  <button
+                    className={`${styles.camItem} ${isSelected ? styles.camItemActive : ''}`}
+                    onClick={() => setSelectedIndex(index)}
+                  >
+                    <span className={styles.camThumbWrap}>
+                      <img
+                        src={`http://localhost:5000/stream?ip=${encodeURIComponent(camera.ip)}`}
+                        alt={camera.name}
+                        className={styles.camThumb}
+                        crossOrigin="anonymous"
+                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                      />
+                    </span>
+                    <span className={styles.camMeta}>
+                      <span className={styles.camName}>{camera.name}</span>
+                      <span className={styles.camIp}>{camera.ip}</span>
+                    </span>
+                    {isSelected && <span className={styles.camLive} />}
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </aside>
       </div>
     </div>
   );
