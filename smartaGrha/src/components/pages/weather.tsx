@@ -1,5 +1,5 @@
 // src/Components/pages/weather.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Line } from 'react-chartjs-2';
 import { motion, type Variants } from 'framer-motion';
