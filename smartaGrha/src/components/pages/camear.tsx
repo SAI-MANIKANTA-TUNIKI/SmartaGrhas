@@ -23,7 +23,6 @@ interface FeedProps {
   isPlaying: boolean;
   action: string;
   setAction: (action: string) => void;
-  darkMode: boolean;
 }
 
 /* --------------------------------------------------------------
@@ -54,7 +53,6 @@ const CameraFeed: React.FC<FeedProps> = ({
   isPlaying,
   action,
   setAction,
-  darkMode,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -447,7 +445,6 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
                 isPlaying={isPlaying}
                 action={action}
                 setAction={setAction}
-                darkMode={darkMode}
               />
             ))}
           </AnimatePresence>
