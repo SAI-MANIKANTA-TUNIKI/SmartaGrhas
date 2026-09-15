@@ -1,21 +1,14 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
 /* ==================================================================
-   Camear — LiveView Hub
-   Language : "Warm Paper" control room  (matches homeDashboard / deviceData)
-   Aesthetic: broadcast studio · hairlines · mono metadata · dark monitors
+   Camera — security console
    ================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;450;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
-/* ------------------------------------------------------------------
-   1. TOKENS — LIGHT
-   ------------------------------------------------------------------ */
 .container {
-  /* Type */
-  --font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Instrument Sans', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
-  /* Surfaces */
   --bg: #f4f1ec;
   --bg-elev: #fbf9f5;
   --bg-card: #ffffff;
@@ -24,794 +17,365 @@
   --border-strong: #d9d2c4;
   --rule: rgba(23, 22, 20, 0.08);
 
-  /* Ink */
   --ink: #0e0e0c;
   --ink-2: #4a4844;
   --ink-3: #8a8681;
-  --ink-4: #b4afa7;
 
-  /* Signature accent — terracotta */
   --accent: #c96442;
   --accent-soft: rgba(201, 100, 66, 0.12);
-  --accent-border: rgba(201, 100, 66, 0.30);
 
-  /* Active / live — sage */
   --sage: #5c8068;
-  --sage-soft: rgba(92, 128, 104, 0.10);
+  --sage-soft: rgba(92, 128, 104, 0.12);
   --sage-border: rgba(92, 128, 104, 0.32);
 
-  /* Monitor stage — always dark, even in light mode */
-  --stage: #0f0f0d;
-  --stage-2: #17161390;
-  --stage-border: rgba(255, 255, 255, 0.08);
-  --stage-ink: #f0ede7;
-  --stage-ink-2: #a09b92;
-
-  /* Shadows */
   --shadow-xs: 0 1px 2px rgba(23, 22, 20, 0.04);
-  --shadow-sm: 0 4px 14px -6px rgba(23, 22, 20, 0.12);
-  --shadow-md: 0 20px 50px -22px rgba(23, 22, 20, 0.30);
-  --shadow-lg: 0 40px 90px -35px rgba(23, 22, 20, 0.45);
+  --shadow-sm: 0 4px 14px -6px rgba(23, 22, 20, 0.14);
+  --shadow-md: 0 20px 50px -22px rgba(23, 22, 20, 0.28);
 
   position: relative;
   isolation: isolate;
   min-height: 100vh;
-  width: 100%;
-  padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1.15rem, 4vw, 4rem)
-           clamp(4rem, 8vw, 7rem);
+  padding: 1.75rem clamp(1.15rem, 4vw, 3rem) clamp(3rem, 6vw, 5rem);
   box-sizing: border-box;
   overflow-x: clip;
-
   font-family: var(--font-body);
-  font-size: 16px;
   color: var(--ink);
   background: var(--bg);
-
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  font-feature-settings: 'ss01' on, 'cv11' on, 'tnum' on, 'case' on;
+  font-feature-settings: 'tnum' on, 'cv11' on;
   transition: background 0.5s ease, color 0.5s ease;
 }
-
-/* Paper grain */
 .container::before {
   content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  opacity: 0.42;
+  position: absolute; inset: 0;
+  pointer-events: none; z-index: 0; opacity: 0.4;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.055 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-/* Masked grid, top-down */
-.container::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image:
-    linear-gradient(to right, rgba(23, 22, 20, 0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(23, 22, 20, 0.03) 1px, transparent 1px);
-  background-size: 72px 72px;
-  mask-image: linear-gradient(180deg, black 0%, transparent 55%);
-  -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 55%);
-}
-
-/* ------------------------------------------------------------------
-   2. DARK MODE
-   ------------------------------------------------------------------ */
 .dark {
-  --bg: #0e0d0c;
-  --bg-elev: #161513;
-  --bg-card: #1a1917;
-  --bg-inset: #121110;
-  --border: #26241f;
-  --border-strong: #3a3733;
-  --rule: rgba(240, 237, 231, 0.07);
-
+  --bg: #0b0b0a;
+  --bg-elev: #121210;
+  --bg-card: #171614;
+  --bg-inset: #0e0e0d;
+  --border: #232120;
+  --border-strong: #333130;
+  --rule: rgba(240, 237, 231, 0.08);
   --ink: #f0ede7;
   --ink-2: #b6b1a8;
   --ink-3: #7d7871;
-  --ink-4: #524f4a;
-
   --accent: #e07856;
   --accent-soft: rgba(224, 120, 86, 0.14);
-  --accent-border: rgba(224, 120, 86, 0.32);
-
   --sage: #8fb098;
-  --sage-soft: rgba(143, 176, 152, 0.12);
+  --sage-soft: rgba(143, 176, 152, 0.14);
   --sage-border: rgba(143, 176, 152, 0.34);
-
-  --stage: #060605;
-  --stage-2: #17161390;
-  --stage-border: rgba(255, 255, 255, 0.06);
-  --stage-ink: #f0ede7;
-  --stage-ink-2: #7d7871;
-
-  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow-sm: 0 4px 18px -8px rgba(0, 0, 0, 0.55);
-  --shadow-md: 0 22px 55px -22px rgba(0, 0, 0, 0.75);
-  --shadow-lg: 0 45px 100px -40px rgba(0, 0, 0, 0.9);
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 4px 18px -8px rgba(0, 0, 0, 0.6);
+  --shadow-md: 0 22px 55px -22px rgba(0, 0, 0, 0.8);
 }
+.dark::before { mix-blend-mode: screen; opacity: 0.45; }
 
-.dark::before {
-  mix-blend-mode: screen;
-  opacity: 0.5;
+/* ---------- Top bar ---------- */
+.topbar {
+  position: relative; z-index: 2;
+  max-width: 1440px; margin: 0 auto 1.5rem;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 1.5rem; flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--rule);
 }
-
-.dark::after {
-  background-image:
-    linear-gradient(to right, rgba(240, 237, 231, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(240, 237, 231, 0.035) 1px, transparent 1px);
-}
-
-/* ------------------------------------------------------------------
-   3. BACKGROUND WATERMARK
-   ------------------------------------------------------------------ */
-.backgroundIcons {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.iconItem {
-  position: absolute;
-  width: clamp(28px, 3.2vw, 44px);
-  height: clamp(28px, 3.2vw, 44px);
-  display: grid;
-  place-items: center;
-  pointer-events: auto;
-  will-change: transform, opacity;
-}
-
-/* keep only the first six for a quieter watermark */
-.iconItem:nth-child(n+7) { display: none; }
-
-.deviceIcon {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  opacity: 0.05;
-  transition: opacity 0.5s ease, filter 0.5s ease;
-}
-
-.iconItem:hover .deviceIcon {
-  opacity: 0.22;
-  filter: drop-shadow(0 0 10px var(--accent-soft));
-}
-
-/* sparkle aura — reuse a soft radial */
-.smokeEffect {
-  position: absolute;
-  inset: -50%;
-  border-radius: 50%;
-  background: radial-gradient(circle, var(--accent-soft), transparent 65%);
-  filter: blur(20px);
-  opacity: 0.5;
-  pointer-events: none;
-  animation: smokePulse 7s ease-in-out infinite;
-}
-
-@keyframes smokePulse {
-  0%, 100% { transform: scale(0.9); opacity: 0.35; }
-  50%      { transform: scale(1.15); opacity: 0.7; }
-}
-
-/* ------------------------------------------------------------------
-   4. HEADER
-   ------------------------------------------------------------------ */
-.header {
-  position: relative;
-  z-index: 2;
-  max-width: 1400px;
-  margin: 0 auto 1.5rem;
-  padding-left: 1.15rem;
-
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 1.25rem;
-
-  border-left: 3px solid var(--accent);
-}
-
-.title { min-width: 0; }
-
-.title h1 {
+.eyebrow {
   margin: 0 0 0.35rem;
-  font-family: var(--font-display);
-  font-size: clamp(1.7rem, 3.4vw, 2.6rem);
-  font-weight: 600;
-  line-height: 1.08;
-  letter-spacing: -0.038em;
-  color: var(--ink);
-  text-wrap: balance;
-}
-
-/* Eyebrow above the h1 — injected, no JSX change needed */
-.title h1::before {
-  content: 'Broadcast · Live';
-  display: block;
-  margin-bottom: 0.55rem;
-
   font-family: var(--font-mono);
-  font-size: 0.66rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
+  font-size: 0.66rem; font-weight: 500;
+  letter-spacing: 0.16em; text-transform: uppercase;
   color: var(--accent);
 }
-
-.title p {
+.title {
   margin: 0;
-  font-family: var(--font-body);
-  font-size: 0.94rem;
-  font-weight: 400;
-  letter-spacing: -0.005em;
-  color: var(--ink-2);
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  color: var(--ink);
 }
 
-/* ------------------------------------------------------------------
-   5. BUTTONS
-   ------------------------------------------------------------------ */
-.buttons {
-  display: flex;
-  align-items: center;
-  gap: 0.55rem;
-  flex-shrink: 0;
-}
+.toolbar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
 
-.addButton,
-.settingsButton {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  height: 40px;
-  padding: 0 1.05rem;
-
+.ghostBtn, .primaryBtn {
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.55rem 0.95rem;
   border-radius: 9px;
   font-family: var(--font-body);
-  font-size: 0.82rem;
-  font-weight: 550;
+  font-size: 0.82rem; font-weight: 500;
   letter-spacing: -0.005em;
   cursor: pointer;
-  white-space: nowrap;
+  transition: background 0.25s ease, border-color 0.25s ease,
+              color 0.25s ease, transform 0.15s ease;
+}
+.ghostBtn {
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--ink);
+}
+.ghostBtn:hover { border-color: var(--border-strong); background: var(--bg-inset); }
+.primaryBtn {
+  border: 1px solid transparent;
+  background: var(--ink);
+  color: var(--bg);
+}
+.primaryBtn:hover { background: var(--accent); color: #fff; }
+.ghostBtn:active, .primaryBtn:active { transform: translateY(1px); }
 
-  transition: background 0.22s ease, color 0.22s ease,
-              border-color 0.22s ease, box-shadow 0.22s ease,
-              transform 0.15s ease;
+/* ---------- Drawer ---------- */
+.drawer {
+  position: relative; z-index: 1;
+  max-width: 1440px; margin: 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+}
+.drawerInner {
+  display: flex; flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.95rem 1.15rem;
+}
+.drawerGroup {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+}
+.drawerLabel {
+  margin-right: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 500;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--ink-3);
 }
 
-/* Primary — Add Camera */
-.addButton {
-  border: 1px solid var(--ink);
+.chip {
+  padding: 0.4rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--ink-2);
+  font-family: var(--font-body);
+  font-size: 0.78rem; font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease,
+              color 0.25s ease, transform 0.15s ease;
+}
+.chip:hover { border-color: var(--border-strong); color: var(--ink); }
+.chip:active { transform: translateY(1px); }
+.chipActive {
+  border-color: var(--ink);
   background: var(--ink);
   color: var(--bg);
 }
 
-.addButton:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #fff;
-  box-shadow: 0 8px 22px -10px var(--accent-border);
-}
-
-.addButton:active { transform: translateY(1px); }
-
-/* Ghost — Settings */
-.settingsButton {
-  border: 1px solid var(--border-strong);
-  background: var(--bg-card);
-  color: var(--ink-2);
-}
-
-.settingsButton:hover {
-  border-color: var(--ink-3);
-  color: var(--ink);
-  background: var(--bg-elev);
-}
-
-.settingsButton:active { transform: translateY(1px); }
-
-.addButton:focus-visible,
-.settingsButton:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ------------------------------------------------------------------
-   6. SETTINGS PANEL — a horizontal control strip
-   ------------------------------------------------------------------ */
-.settingsPanel {
-  position: relative;
-  z-index: 2;
-  max-width: 1400px;
-  margin: 0 auto 1.25rem;
-  padding: 0.9rem 1.1rem;
-
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.55rem;
-
-  border-radius: 12px;
-  border: 1px solid var(--border);
-  background: var(--bg-elev);
-  box-shadow: var(--shadow-xs);
-}
-
-.settingsPanel button {
-  height: 34px;
-  padding: 0 0.85rem;
-
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
-  background: var(--bg-card);
-  color: var(--ink-2);
-
-  font-family: var(--font-body);
-  font-size: 0.78rem;
-  font-weight: 500;
-  letter-spacing: -0.005em;
-  cursor: pointer;
-  white-space: nowrap;
-
-  transition: background 0.2s ease, color 0.2s ease,
-              border-color 0.2s ease, transform 0.15s ease;
-}
-
-.settingsPanel button:hover {
-  background: var(--bg-inset);
-  border-color: var(--ink-3);
-  color: var(--ink);
-}
-
-.settingsPanel button:active { transform: translateY(1px); }
-
-.settingsPanel button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* The view-mode select */
-.settingsPanel select {
-  height: 34px;
-  padding: 0 2rem 0 0.85rem;
-  margin-left: auto;
-
-  border-radius: 8px;
-  border: 1px solid var(--border-strong);
-  background-color: var(--bg-card);
-  color: var(--ink-2);
-
-  font-family: var(--font-mono);
-  font-size: 0.76rem;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  cursor: pointer;
-
-  appearance: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238a8681' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
-  background-repeat: no-repeat;
-  background-position: right 0.7rem center;
-
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-.settingsPanel select:hover {
-  border-color: var(--ink-3);
-}
-
-.settingsPanel select:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-/* ------------------------------------------------------------------
-   7. MAIN LAYOUT — grid on left, channel list on right
-   ------------------------------------------------------------------ */
-.mainContent {
-  position: relative;
-  z-index: 1;
-  max-width: 1400px;
-  margin: 0 auto;
-
+/* ---------- Main layout ---------- */
+.main {
+  position: relative; z-index: 1;
+  max-width: 1440px; margin: 0 auto;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(0, 1fr) 280px;
   gap: 1.25rem;
   align-items: start;
 }
 
-/* ------------------------------------------------------------------
-   8. CAMERA GRID
-   ------------------------------------------------------------------ */
-.cameraGrid {
-  position: relative;
+.grid {
   display: grid;
-  gap: 0.85rem;
-  min-width: 0;
-}
-
-/* The stage — dark monitors on a paper background */
-.feedContainer {
-  position: relative;
-  overflow: hidden;
-
-  border-radius: 12px;
-  border: 1px solid var(--stage-border);
-  background: var(--stage);
-
-  aspect-ratio: 3 / 2;
-  min-height: 220px;
-
-  box-shadow: var(--shadow-md);
-  will-change: transform, box-shadow;
-  transform: translateZ(0);
-  transition: box-shadow 0.4s ease, border-color 0.3s ease;
-}
-
-.feedContainer:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: var(--shadow-lg);
-}
-
-/* REC indicator — top-left, replaces a UI overlay */
-.feedContainer::before {
-  content: '';
-  position: absolute;
-  top: 14px;
-  left: 14px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent);
-  box-shadow: 0 0 0 0 var(--accent-border);
-  animation: rec 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  z-index: 3;
-  pointer-events: none;
-}
-
-@keyframes rec {
-  0%, 100% { opacity: 1;   box-shadow: 0 0 0 0 var(--accent-border); }
-  50%      { opacity: 0.5; box-shadow: 0 0 0 6px transparent; }
-}
-
-/* Subtle scanlines — reads as "video", not "graphic design" */
-.feedContainer::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.015) 0px,
-    rgba(255, 255, 255, 0.015) 1px,
-    transparent 1px,
-    transparent 3px
-  );
-  mix-blend-mode: overlay;
-}
-
-/* Canvas fills the monitor, aspect-locked */
-.canvas {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  background: #000;
-  z-index: 1;
-}
-
-/* The hidden <img> stays hidden — explicitly, no flicker */
-.feedContainer > img {
-  display: none !important;
-}
-
-/* Bottom info bar with camera name + metadata */
-.feedInfo {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 3;
-
-  padding: 1.4rem 1.1rem 0.95rem;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(0, 0, 0, 0.55) 55%,
-    rgba(0, 0, 0, 0.82) 100%
-  );
-
-  color: var(--stage-ink);
-  pointer-events: none;
-}
-
-.feedInfo h2 {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 0.98rem;
-  font-weight: 600;
-  letter-spacing: -0.018em;
-  line-height: 1.2;
-  color: var(--stage-ink);
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Injected metadata line under the camera name */
-.feedInfo h2::after {
-  content: 'REC · 600×400 · MJPEG';
-  display: block;
-  margin-top: 0.25rem;
-
-  font-family: var(--font-mono);
-  font-size: 0.62rem;
-  font-weight: 500;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--stage-ink-2);
-}
-
-/* Stream error — small inline notice, not a red alarm */
-.error {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  z-index: 4;
-  max-width: 60%;
-
-  padding: 0.4rem 0.7rem;
-  border-radius: 6px;
-  border: 1px solid var(--accent-border);
-  background: rgba(201, 100, 66, 0.14);
-  backdrop-filter: blur(6px);
-
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  color: #ffb89e;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-}
-
-/* ------------------------------------------------------------------
-   9. CAMERA LIST — right-side channel panel
-   ------------------------------------------------------------------ */
-.cameraList {
-  position: sticky;
-  top: 1.5rem;
-  align-self: start;
-
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  max-height: calc(100vh - 3rem);
-  overflow-y: auto;
-  padding-right: 4px;
-}
-
-.cameraList h3 {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  margin: 0 0 0.35rem;
-  padding-bottom: 0.75rem;
-
-  font-family: var(--font-mono);
-  font-size: 0.68rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--ink-3);
-
-  border-bottom: 1px solid var(--rule);
-  background: var(--bg);
-}
-
-/* --- Channel row --- */
-.cameraItem {
-  position: relative;
-  overflow: hidden;
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  align-items: center;
   gap: 0.75rem;
-
-  padding: 0.5rem;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-
-  cursor: pointer;
-  will-change: transform, border-color, box-shadow, background;
-  transition:
-    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    border-color 0.28s ease,
-    box-shadow 0.28s ease,
-    background 0.28s ease;
+  min-height: 400px;
 }
 
-.cameraItem:hover {
+/* ---------- Feed ---------- */
+.feed {
+  display: flex; flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: #050504;
+  box-shadow: var(--shadow-xs);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.feed:hover {
   border-color: var(--border-strong);
   box-shadow: var(--shadow-sm);
-  transform: translateX(2px);
 }
 
-.cameraItem.selected {
-  border-color: var(--sage-border);
-  background: linear-gradient(180deg, var(--bg-card), var(--sage-soft));
+.feedFrame {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  background: #050504;
+}
+.canvas {
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
-/* Left rail on selected */
-.cameraItem.selected::before {
-  content: '';
+.feedError {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(5, 5, 4, 0.82);
+  color: #f0ede7;
+  font-family: var(--font-mono);
+  font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+  text-align: center;
+}
+.feedErrorDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #e07856;
+  box-shadow: 0 0 10px #e07856;
+  flex-shrink: 0;
+}
+
+.liveTag {
   position: absolute;
-  left: 0;
-  top: 50%;
-  width: 3px;
-  height: 60%;
-  transform: translateY(-50%);
-  border-radius: 0 3px 3px 0;
-  background: var(--sage);
-  box-shadow: 0 0 10px var(--sage-border);
+  top: 0.7rem; left: 0.7rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.32rem 0.6rem 0.32rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(5, 5, 4, 0.65);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(240, 237, 231, 0.14);
+  color: #f0ede7;
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 600;
+  letter-spacing: 0.16em;
+}
+.liveDot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #e07856;
+  box-shadow: 0 0 8px #e07856;
 }
 
-.cameraItem span {
-  min-width: 0;
-  font-family: var(--font-body);
-  font-size: 0.85rem;
-  font-weight: 500;
-  letter-spacing: -0.008em;
-  color: var(--ink-2);
-
-  overflow: hidden;
-  text-overflow: ellipsis;
+.feedBar {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-top: 1px solid rgba(240, 237, 231, 0.06);
+  background: #050504;
+}
+.feedName {
+  font-family: var(--font-display);
+  font-size: 0.88rem; font-weight: 600;
+  letter-spacing: -0.015em;
+  color: #f0ede7;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.feedIp {
+  font-family: var(--font-mono);
+  font-size: 0.66rem; font-weight: 500;
+  letter-spacing: 0.04em;
+  color: #7d7871;
   white-space: nowrap;
 }
 
-.cameraItem.selected span { color: var(--ink); }
-
-/* --- Thumbnail --- */
-.cameraThumbnail {
-  width: 64px;
-  height: 44px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: var(--stage);
+/* ---------- Sidebar ---------- */
+.sidebar {
+  padding: 1.1rem 1.15rem;
   border: 1px solid var(--border);
-  filter: saturate(0.85);
-  transition: filter 0.3s ease, border-color 0.3s ease;
+  border-radius: 14px;
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
+  position: sticky; top: 1.5rem;
 }
-
-.cameraItem:hover .cameraThumbnail {
-  filter: saturate(1);
-  border-color: var(--border-strong);
-}
-
-.cameraItem.selected .cameraThumbnail {
-  border-color: var(--sage-border);
-}
-
-/* --- Camera list scrollbar (thin) --- */
-.cameraList::-webkit-scrollbar { width: 6px; }
-.cameraList::-webkit-scrollbar-track { background: transparent; }
-.cameraList::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: var(--border-strong);
-}
-.cameraList::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-3);
-}
-
-/* ------------------------------------------------------------------
-   10. RESPONSIVE
-   ------------------------------------------------------------------ */
-@media (max-width: 1100px) {
-  .mainContent {
-    grid-template-columns: 1fr;
-  }
-
-  .cameraList {
-    position: static;
-    max-height: none;
-
-    flex-direction: row;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding: 0.5rem 0;
-    gap: 0.5rem;
-
-    scroll-snap-type: x mandatory;
-  }
-
-  .cameraList h3 {
-    position: static;
-    display: none; /* header is redundant once horizontal */
-  }
-
-  .cameraItem {
-    flex: 0 0 auto;
-    grid-template-columns: 64px 1fr;
-    min-width: 200px;
-    scroll-snap-align: start;
-  }
-}
-
-@media (max-width: 720px) {
-  .container { padding: 2rem 1rem 4rem; }
-
-  .header {
-    flex-direction: column;
-    align-items: stretch;
-    padding-left: 0.9rem;
-  }
-
-  .buttons { justify-content: flex-start; }
-  .addButton, .settingsButton { flex: 1 1 auto; justify-content: center; }
-
-  .settingsPanel select { margin-left: 0; }
-
-  .feedContainer { min-height: 180px; }
-}
-
-@media (max-width: 480px) {
-  .feedContainer::before { top: 10px; left: 10px; }
-
-  .feedInfo { padding: 1.1rem 0.85rem 0.75rem; }
-  .feedInfo h2 { font-size: 0.9rem; }
-
-  .error { top: 10px; right: 10px; font-size: 0.6rem; padding: 0.35rem 0.55rem; }
-}
-
-/* ------------------------------------------------------------------
-   11. A11Y & POLISH
-   ------------------------------------------------------------------ */
-.cameraItem:focus-visible,
-.addButton:focus-visible,
-.settingsButton:focus-visible,
-.settingsPanel button:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-.container ::selection {
-  background: var(--accent-soft);
+.sidebarHead {
+  display: flex; align-items: baseline; justify-content: space-between;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.6rem;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--font-display);
+  font-size: 0.92rem; font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
-
-.container::-webkit-scrollbar { width: 10px; }
-.container::-webkit-scrollbar-track { background: transparent; }
-.container::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: var(--border-strong);
-  border: 3px solid var(--bg);
-  background-clip: padding-box;
-}
-.container::-webkit-scrollbar-thumb:hover {
-  background: var(--ink-3);
-  background-clip: padding-box;
+.sidebarCount {
+  font-family: var(--font-mono);
+  font-size: 0.66rem; font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--ink-3);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .container *,
-  .container *::before,
-  .container *::after {
-    animation-duration: 0.001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.001ms !important;
-  }
+.camList {
+  list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 0.35rem;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.camItem {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.25s ease, background 0.25s ease;
+}
+.camItem:hover { background: var(--bg-inset); }
+.camItemActive {
+  border-color: var(--border-strong);
+  background: var(--bg-card);
+}
+
+.camThumbWrap {
+  width: 44px; height: 33px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #050504;
+  border: 1px solid var(--border);
+}
+.camThumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.camMeta { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.camName {
+  font-family: var(--font-body);
+  font-size: 0.85rem; font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.camIp {
+  font-family: var(--font-mono);
+  font-size: 0.66rem; font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+
+.camLive {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--sage);
+  box-shadow: 0 0 8px var(--sage-border);
+  animation: livePulse 1.8s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .main { grid-template-columns: 1fr; }
+  .sidebar { position: static; }
+  .camList { max-height: none; }
+}
+
+@media (max-width: 560px) {
+  .container { padding: 1.25rem 1rem 3rem; }
+  .toolbar { width: 100%; }
+  .ghostBtn, .primaryBtn { flex: 1; justify-content: center; }
+  .grid { gap: 0.5rem; }
 }
