@@ -1,86 +1,56 @@
-// frontend/src/components/pages/powerSuplay.tsx
+// src/Components/pages/PowerSuplay.tsx
 import React, { useEffect, useState } from 'react';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, Tooltip, PieChart, Pie, Cell,
+  Legend, ResponsiveContainer, CartesianGrid,
 } from 'recharts';
 import { format } from 'date-fns';
 import styles from '../pagesmodulecss/powerSuplay.module.css';
-import { motion } from 'framer-motion';
-import {
-  getPowerEntries,
-  getRoomPowers,
-  getDeviceStatuses,
-} from '../../services/api';
+import { motion, type Variants } from 'framer-motion';
+import { getPowerEntries, getRoomPowers, getDeviceStatuses } from '../../services/api';
 
-type PowerEntry = {
-  time_bucket: string;
-  power_consumed: number;
-};
-
-type RoomPower = {
-  room_name: string;
-  power_consumed: number;
-};
-
+type PowerEntry = { time_bucket: string; power_consumed: number; };
+type RoomPower = { room_name: string; power_consumed: number; };
 type DeviceStatus = {
-  room_name: string;
-  device_name: string;
+  room_name: string; device_name: string;
   power_consumed: number;
   status: 'Active' | 'Inactive' | 'Not Started';
 };
 
-const COLORS = [
-  '#c96442',
-  '#6b8e78',
-  '#c19a3e',
-  '#8c6a8e',
-  '#5b7a94',
-  '#b06b7a',
-  '#7a8a5c',
-];
+const COLORS = ['#c96442', '#5c8068', '#8a8681', '#d9a878', '#7c8aa5', '#b4afa7'];
 
-interface PowerSuplayProps {
-  darkMode: boolean;
-}
+interface PowerSuplayProps { darkMode: boolean; }
+
+const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
+const stagger: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+const fadeUp: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: EASE } },
+};
 
 const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
   const [powerData, setPowerData] = useState<PowerEntry[]>([]);
   const [roomPowerData, setRoomPowerData] = useState<RoomPower[]>([]);
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus[]>([]);
   const [totalPower, setTotalPower] = useState<number>(0);
-  const [timeRange, setTimeRange] = useState<
-    'day' | 'week' | 'month' | 'year'
-  >('day');
+  const [timeRange, setTimeRange] = useState<'day' | 'week' | 'month' | 'year'>('day');
 
-  useEffect(() => {
-    fetchData();
-  }, [timeRange]);
+  useEffect(() => { fetchData(); }, [timeRange]);
 
   const fetchData = async () => {
     try {
       const powerRes = await getPowerEntries(timeRange);
       setPowerData(powerRes.data.powerData || []);
-
       const roomRes = await getRoomPowers();
       setRoomPowerData(roomRes.data.roomPowerData || []);
-
       const deviceRes = await getDeviceStatuses();
       setDeviceStatus(deviceRes.data.deviceStatus || []);
-
       const total = roomRes.data.roomPowerData.reduce(
-        (sum: number, r: RoomPower) => sum + r.power_consumed,
-        0
+        (sum: number, r: RoomPower) => sum + r.power_consumed, 0
       );
-
       setTotalPower(total);
     } catch (error) {
       console.error('Error fetching power data:', error);
@@ -89,67 +59,24 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
   };
 
   const generateMockData = () => {
-    const mockPowerData: PowerEntry[] = Array.from(
-      { length: 7 },
-      (_, i) => ({
-        time_bucket: new Date(
-          Date.now() - i * 3600 * 1000
-        ).toISOString(),
-        power_consumed: Math.floor(Math.random() * 30) + 20,
-      })
-    ).reverse();
+    const mockPowerData: PowerEntry[] = Array.from({ length: 7 }, (_, i) => ({
+      time_bucket: new Date(Date.now() - i * 3600 * 1000).toISOString(),
+      power_consumed: Math.floor(Math.random() * 30) + 20,
+    })).reverse();
 
     const mockRoomPowerData: RoomPower[] = [
-      {
-        room_name: 'Living Room',
-        power_consumed: 120,
-      },
-      {
-        room_name: 'Kitchen',
-        power_consumed: 90,
-      },
-      {
-        room_name: 'Bedroom',
-        power_consumed: 60,
-      },
-      {
-        room_name: 'Bathroom',
-        power_consumed: 30,
-      },
+      { room_name: 'Living Room', power_consumed: 120 },
+      { room_name: 'Kitchen', power_consumed: 90 },
+      { room_name: 'Bedroom', power_consumed: 60 },
+      { room_name: 'Bathroom', power_consumed: 30 },
     ];
-
     const mockDeviceStatus: DeviceStatus[] = [
-      {
-        room_name: 'Living Room',
-        device_name: 'TV',
-        power_consumed: 40,
-        status: 'Active',
-      },
-      {
-        room_name: 'Kitchen',
-        device_name: 'Refrigerator',
-        power_consumed: 50,
-        status: 'Active',
-      },
-      {
-        room_name: 'Bedroom',
-        device_name: 'Fan',
-        power_consumed: 20,
-        status: 'Inactive',
-      },
-      {
-        room_name: 'Bathroom',
-        device_name: 'Heater',
-        power_consumed: 15,
-        status: 'Not Started',
-      },
+      { room_name: 'Living Room', device_name: 'TV', power_consumed: 40, status: 'Active' },
+      { room_name: 'Kitchen', device_name: 'Refrigerator', power_consumed: 50, status: 'Active' },
+      { room_name: 'Bedroom', device_name: 'Fan', power_consumed: 20, status: 'Inactive' },
+      { room_name: 'Bathroom', device_name: 'Heater', power_consumed: 15, status: 'Not Started' },
     ];
-
-    const total = mockRoomPowerData.reduce(
-      (sum, r) => sum + r.power_consumed,
-      0
-    );
-
+    const total = mockRoomPowerData.reduce((sum, r) => sum + r.power_consumed, 0);
     setPowerData(mockPowerData);
     setRoomPowerData(mockRoomPowerData);
     setDeviceStatus(mockDeviceStatus);
@@ -159,11 +86,7 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
   const barData = powerData.map((entry) => ({
     date: format(
       new Date(entry.time_bucket),
-      timeRange === 'day'
-        ? 'HH:mm'
-        : timeRange === 'year'
-        ? 'MMM yyyy'
-        : 'dd/MM'
+      timeRange === 'day' ? 'HH:mm' : timeRange === 'year' ? 'MMM yyyy' : 'dd/MM'
     ),
     power: entry.power_consumed,
   }));
@@ -173,537 +96,208 @@ const PowerSuplay: React.FC<PowerSuplayProps> = ({ darkMode }) => {
     value: entry.power_consumed,
   }));
 
-  const activeDevices = deviceStatus.filter(
-    (device) => device.status === 'Active'
-  ).length;
-
-  const totalDevices = deviceStatus.length;
-
-  const averagePower =
-    barData.length > 0
-      ? barData.reduce((sum, entry) => sum + entry.power, 0) /
-        barData.length
-      : 0;
-
-  const usageIncreased = totalPower > 200;
-
-  const getStatusClass = (status: DeviceStatus['status']) => {
-    switch (status) {
-      case 'Active':
-        return styles.statusPill + ' ' + styles.statusActive;
-
-      case 'Inactive':
-        return styles.statusPill + ' ' + styles.statusInactive;
-
-      case 'Not Started':
-        return styles.statusPill + ' ' + styles.statusNotStarted;
-
-      default:
-        return styles.statusPill;
-    }
-  };
+  const tooltipStyle = {
+    backgroundColor: darkMode ? '#1a1917' : '#0e0e0c',
+    border: `1px solid ${darkMode ? '#3a3733' : '#26241f'}`,
+    borderRadius: 8,
+    padding: '8px 10px',
+    fontFamily: 'Inter',
+    fontSize: 11,
+    color: '#f0ede7',
+  } as const;
 
   return (
-    <motion.div
-      className={`${styles.container} ${
-        darkMode ? styles.darkMode : styles.lightMode
-      }`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.8,
-        ease: 'easeOut',
-      }}
-    >
-      {/* =========================================================
-          HEADER
-         ========================================================= */}
-      <div className={styles.header}>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <motion.h2
-            className={styles.title}
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            Power Supply Dashboard
-          </motion.h2>
+    <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
+      <header className={styles.topbar}>
+        <div>
+          <p className={styles.eyebrow}>Energy · Supply</p>
+          <h1 className={styles.title}>Power consumption</h1>
+        </div>
 
-          <p className={styles.subtitle}>
-            Electricity consumption across rooms and connected devices.
-          </p>
-        </motion.div>
-
-        {/* Time Range Controls */}
-        <div className={styles.controls}>
-          {['day', 'week', 'month', 'year'].map((range) => (
-            <motion.button
+        <div className={styles.rangePicker} role="tablist">
+          {(['day', 'week', 'month', 'year'] as const).map((range) => (
+            <button
               key={range}
-              className={`${styles.button} ${
-                timeRange === range ? styles.active : ''
-              }`}
-              onClick={() =>
-                setTimeRange(
-                  range as 'day' | 'week' | 'month' | 'year'
-                )
-              }
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{
-                type: 'spring',
-                stiffness: 200,
-              }}
+              type="button"
+              role="tab"
+              aria-selected={timeRange === range}
+              className={`${styles.rangeBtn} ${timeRange === range ? styles.rangeBtnActive : ''}`}
+              onClick={() => setTimeRange(range)}
             >
-              {range.toUpperCase()}
-
-              {timeRange === range && (
-                <motion.span
-                  className={styles.buttonIndicator}
-                  layoutId="powerRangeIndicator"
-                  transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 30,
-                  }}
-                />
-              )}
-            </motion.button>
+              {range.charAt(0).toUpperCase() + range.slice(1)}
+            </button>
           ))}
         </div>
-      </div>
+      </header>
 
-      {/* =========================================================
-          HERO STAT
-         ========================================================= */}
       <motion.div
-        className={styles.heroStat}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.7,
-          delay: 0.15,
-        }}
+        className={styles.stack}
+        initial="hidden"
+        animate="visible"
+        variants={stagger}
       >
-        <div className={styles.heroLeft}>
-          <span className={styles.heroLabel}>
-            Total Energy Consumption
-          </span>
-
-          <div className={styles.heroValue}>
-            {totalPower.toFixed(2)}
-            <span className={styles.heroUnit}>kWh</span>
+        {/* ---------- Total + bar chart ---------- */}
+        <motion.section className={styles.heroRow} variants={fadeUp}>
+          <div className={styles.totalCard}>
+            <p className={styles.statLabel}>Total usage</p>
+            <div className={styles.statValueRow}>
+              <span className={styles.statValue}>{totalPower.toFixed(2)}</span>
+              <span className={styles.statUnit}>kWh</span>
+            </div>
+            <p className={styles.trend} data-dir={totalPower > 200 ? 'up' : 'down'}>
+              <span className={styles.trendArrow}>{totalPower > 200 ? '↑' : '↓'}</span>
+              {totalPower > 200 ? '12%' : '4%'} vs previous {timeRange}
+            </p>
+            <p className={styles.statHint}>
+              Aggregated across {roomPowerData.length} rooms
+            </p>
           </div>
 
-          <div
-            className={`${styles.heroDelta} ${
-              usageIncreased
-                ? styles.heroDeltaUp
-                : styles.heroDeltaDown
-            }`}
-          >
-            {usageIncreased
-              ? '▲ 12% Increase'
-              : '▼ 4% Decrease'}
-
-            <span>from last period</span>
-          </div>
-        </div>
-
-        <div className={styles.heroRight}>
-          <div className={styles.heroStatLine}>
-            <span className={styles.heroStatLabel}>
-              Selected range
-            </span>
-
-            <span className={styles.heroStatValue}>
-              {timeRange.toUpperCase()}
-            </span>
-          </div>
-
-          <div className={styles.heroStatLine}>
-            <span className={styles.heroStatLabel}>
-              Active devices
-            </span>
-
-            <span className={styles.heroStatValue}>
-              {activeDevices} / {totalDevices}
-            </span>
-          </div>
-
-          <div className={styles.heroStatLine}>
-            <span className={styles.heroStatLabel}>
-              Average reading
-            </span>
-
-            <span className={styles.heroStatValue}>
-              {averagePower.toFixed(2)} kWh
-            </span>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* =========================================================
-          CHARTS
-         ========================================================= */}
-      <div className={styles.charts}>
-        {/* Consumption Chart */}
-        <motion.div
-          className={styles.chartBox}
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            duration: 0.7,
-            delay: 0.2,
-          }}
-        >
-          <div className={styles.chartHeader}>
-            <h3 className={styles.chartTitle}>
-              Consumption Over Time
-            </h3>
-
-            <span className={styles.chartMeta}>
-              {timeRange} · kWh
-            </span>
-          </div>
-
-          <div className={styles.chartBody}>
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <BarChart
-                data={barData}
-                margin={{
-                  top: 10,
-                  right: 10,
-                  left: -10,
-                  bottom: 5,
-                }}
-              >
-                <XAxis
-                  dataKey="date"
-                  stroke="var(--chart-axis)"
-                  tick={{
-                    fill: 'var(--chart-axis)',
-                    fontSize: 11,
-                  }}
-                  axisLine={{
-                    stroke: 'var(--chart-grid)',
-                  }}
-                  tickLine={false}
-                />
-
-                <YAxis
-                  stroke="var(--chart-axis)"
-                  tick={{
-                    fill: 'var(--chart-axis)',
-                    fontSize: 11,
-                  }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '9px',
-                    color: 'var(--ink)',
-                    boxShadow:
-                      'var(--shadow-md)',
-                  }}
-                  labelStyle={{
-                    color: 'var(--ink-3)',
-                  }}
-                  itemStyle={{
-                    color: 'var(--ink)',
-                  }}
-                  cursor={{
-                    fill: 'var(--accent-soft)',
-                  }}
-                />
-
-                <Bar
-                  dataKey="power"
-                  fill="var(--chart-1)"
-                  radius={[5, 5, 0, 0]}
-                  maxBarSize={48}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-
-        {/* Room Pie Chart */}
-        <motion.div
-          className={styles.chartBox}
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{
-            duration: 0.7,
-            delay: 0.3,
-          }}
-        >
-          <div className={styles.chartHeader}>
-            <h3 className={styles.chartTitle}>
-              Power Usage by Room
-            </h3>
-
-            <span className={styles.chartMeta}>
-              Distribution
-            </span>
-          </div>
-
-          <div className={styles.chartBody}>
-            <ResponsiveContainer
-              width="100%"
-              height={300}
-            >
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  outerRadius={100}
-                  innerRadius={55}
-                  paddingAngle={2}
-                  label
-                >
-                  {pieData.map((_, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={
-                        COLORS[
-                          index % COLORS.length
-                        ]
-                      }
-                    />
-                  ))}
-                </Pie>
-
-                <Tooltip
-                  contentStyle={{
-                    background: 'var(--bg-card)',
-                    border: '1px solid var(--border)',
-                    borderRadius: '9px',
-                    color: 'var(--ink)',
-                    boxShadow:
-                      'var(--shadow-md)',
-                  }}
-                />
-
-                <Legend
-                  wrapperStyle={{
-                    color: 'var(--ink-2)',
-                    fontSize: '12px',
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* =========================================================
-          DETAILED BREAKDOWN
-         ========================================================= */}
-      <motion.div
-        className={styles.summary}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.4,
-        }}
-      >
-        <h4>Detailed Breakdown</h4>
-
-        <div className={styles.breakdownList}>
-          {pieData.map((entry, index) => {
-            const percentage =
-              totalPower > 0
-                ? (entry.value / totalPower) * 100
-                : 0;
-
-            return (
-              <motion.div
-                key={entry.name}
-                className={styles.breakdownRow}
-                initial={{
-                  opacity: 0,
-                  x: -10,
-                }}
-                animate={{
-                  opacity: 1,
-                  x: 0,
-                }}
-                transition={{
-                  duration: 0.4,
-                  delay:
-                    0.45 + index * 0.05,
-                }}
-              >
-                <span
-                  className={
-                    styles.breakdownName
-                  }
-                >
-                  {entry.name}
-                </span>
-
-                <div
-                  className={
-                    styles.breakdownBar
-                  }
-                >
-                  <motion.div
-                    className={
-                      styles.breakdownBarFill
-                    }
-                    style={{
-                      width: `${percentage}%`,
-                      background:
-                        COLORS[
-                          index %
-                            COLORS.length
-                        ],
-                    }}
-                    initial={{
-                      scaleX: 0,
-                    }}
-                    animate={{
-                      scaleX: 1,
-                    }}
-                    transition={{
-                      duration: 0.8,
-                      delay:
-                        0.5 +
-                        index * 0.06,
-                      ease: 'easeOut',
-                    }}
+          <div className={styles.chartCard}>
+            <header className={styles.sectionHead}>
+              <h2>Usage over time</h2>
+              <span className={styles.monoHint}>{timeRange}</span>
+            </header>
+            <div className={styles.barWrap}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={barData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+                  <CartesianGrid
+                    vertical={false}
+                    stroke={darkMode ? 'rgba(240,237,231,0.06)' : 'rgba(23,22,20,0.06)'}
                   />
-                </div>
+                  <XAxis
+                    dataKey="date"
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: darkMode ? '#7d7871' : '#8a8681', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+                  />
+                  <YAxis
+                    axisLine={false}
+                    tickLine={false}
+                    tick={{ fill: darkMode ? '#7d7871' : '#8a8681', fontSize: 10, fontFamily: 'JetBrains Mono' }}
+                  />
+                  <Tooltip contentStyle={tooltipStyle} cursor={{ fill: 'transparent' }} />
+                  <Bar dataKey="power" fill={darkMode ? '#e07856' : '#c96442'} radius={[4, 4, 0, 0]} maxBarSize={40} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </motion.section>
 
-                <span
-                  className={
-                    styles.breakdownPercent
-                  }
-                >
-                  {percentage.toFixed(2)}%
-                </span>
-
-                <span
-                  className={
-                    styles.breakdownValue
-                  }
-                >
-                  {entry.value.toFixed(2)} kWh
-                </span>
-              </motion.div>
-            );
-          })}
-        </div>
-
-        <div className={styles.breakdownTotal}>
-          <span>Total Power Usage</span>
-
-          <span
-            className={
-              styles.breakdownTotalValue
-            }
-          >
-            {totalPower.toFixed(2)} kWh
-          </span>
-        </div>
-      </motion.div>
-
-      {/* =========================================================
-          DEVICE STATUS
-         ========================================================= */}
-      <motion.div
-        className={styles.deviceStatus}
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.5,
-        }}
-      >
-        <h4>Device Status</h4>
-
-        <table className={styles.statusTable}>
-          <thead>
-            <tr>
-              <th>Room</th>
-              <th>Device</th>
-              <th>Power Consumed (kWh)</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {deviceStatus.map(
-              (status, index) => (
-                <motion.tr
-                  key={`${status.room_name}-${status.device_name}-${index}`}
-                  initial={{
-                    opacity: 0,
-                    y: 8,
-                  }}
-                  animate={{
-                    opacity: 1,
-                    y: 0,
-                  }}
-                  transition={{
-                    duration: 0.35,
-                    delay:
-                      0.55 +
-                      index * 0.05,
-                  }}
-                  whileHover={{
-                    scale: 1.01,
-                  }}
-                >
-                  <td>{status.room_name}</td>
-
-                  <td>{status.device_name}</td>
-
-                  <td
-                    className={
-                      styles.num
-                    }
+        {/* ---------- Room breakdown ---------- */}
+        <motion.section className={styles.split} variants={fadeUp}>
+          <div className={styles.chartCard}>
+            <header className={styles.sectionHead}>
+              <h2>By room</h2>
+              <span className={styles.monoHint}>Share of total</span>
+            </header>
+            <div className={styles.pieWrap}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius="55%"
+                    outerRadius="85%"
+                    paddingAngle={2}
+                    stroke={darkMode ? '#1a1917' : '#ffffff'}
+                    strokeWidth={2}
                   >
-                    {status.power_consumed.toFixed(
-                      2
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle} />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    iconType="circle"
+                    iconSize={8}
+                    formatter={(value) => (
+                      <span style={{ color: darkMode ? '#b6b1a8' : '#4a4844', fontSize: 11 }}>{value}</span>
                     )}
-                  </td>
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
 
-                  <td>
+          <div className={styles.breakdown}>
+            <header className={styles.sectionHead}>
+              <h2>Breakdown</h2>
+              <span className={styles.monoHint}>kWh · %</span>
+            </header>
+            <ul className={styles.breakdownList}>
+              {pieData.map((entry, i) => {
+                const pct = totalPower > 0 ? (entry.value / totalPower) * 100 : 0;
+                return (
+                  <li key={entry.name} className={styles.breakdownItem}>
                     <span
-                      className={getStatusClass(
-                        status.status
-                      )}
-                    >
-                      <span
-                        className={
-                          styles.pillDot
-                        }
-                      />
-
-                      {status.status}
+                      className={styles.breakdownSwatch}
+                      style={{ background: COLORS[i % COLORS.length] }}
+                    />
+                    <span className={styles.breakdownName}>{entry.name}</span>
+                    <span className={styles.breakdownValue}>
+                      {entry.value.toFixed(2)}
+                      <span className={styles.breakdownUnit}>kWh</span>
                     </span>
-                  </td>
-                </motion.tr>
-              )
-            )}
-          </tbody>
-        </table>
+                    <span className={styles.breakdownPct}>{pct.toFixed(1)}%</span>
+                    <span className={styles.breakdownBar} aria-hidden>
+                      <motion.span
+                        className={styles.breakdownBarFill}
+                        style={{ background: COLORS[i % COLORS.length] }}
+                        initial={{ width: 0 }}
+                        animate={{ width: `${pct}%` }}
+                        transition={{ duration: 0.9, ease: EASE, delay: 0.15 + i * 0.05 }}
+                      />
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </motion.section>
+
+        {/* ---------- Device table ---------- */}
+        <motion.section className={styles.tableCard} variants={fadeUp}>
+          <header className={styles.sectionHead}>
+            <h2>Device status</h2>
+            <span className={styles.monoHint}>{deviceStatus.length} devices</span>
+          </header>
+
+          <div className={styles.tableScroll}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Room</th>
+                  <th>Device</th>
+                  <th className={styles.right}>Power</th>
+                  <th className={styles.right}>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {deviceStatus.map((s, i) => (
+                  <tr key={i}>
+                    <td className={styles.mutedCell}>{s.room_name}</td>
+                    <td>{s.device_name}</td>
+                    <td className={styles.right + ' ' + styles.monoCell}>
+                      {s.power_consumed.toFixed(2)}<span className={styles.tdUnit}> kWh</span>
+                    </td>
+                    <td className={styles.right}>
+                      <span className={styles.statusPill} data-status={s.status.replace(' ', '-').toLowerCase()}>
+                        <span className={styles.statusDot} />
+                        {s.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.section>
       </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
