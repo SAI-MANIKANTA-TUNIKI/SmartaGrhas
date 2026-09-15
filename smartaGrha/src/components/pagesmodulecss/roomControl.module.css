@@ -1,382 +1,972 @@
-/* ==========================================
-   ROOM CONTROL - PREMIUM ANIMATION THEME
-   Glassmorphism + Aurora Gradient FX
-   ========================================== */
+/* ==================================================================
+   RoomControl — per-room device control
+   Design language: "Warm Paper"  (matches homeDashboard + deviceData)
+   Aesthetic:  editorial product studio · paper + ink + terracotta/sage
+   ================================================================== */
 
-.lightMode {
-  background: radial-gradient(circle at top left, #e0e0e0, #d7d8d8);
-  color: #2a2a2a;
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;450;500;600&display=swap');
+
+/* ------------------------------------------------------------------
+   0. TOKEN ROOTS — outer wrapper carries light/dark class
+   ------------------------------------------------------------------ */
+.lightMode,
+.darkMode {
+  position: relative;
+  overflow-x: clip;
+  min-height: 100vh;
+
+  /* Type */
+  --font-display: 'Instrument Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Inter', 'Segoe UI', system-ui, sans-serif;
+
+  /* Surfaces */
+  --bg: #f4f1ec;
+  --bg-elev: #fbf9f5;
+  --bg-card: #ffffff;
+  --bg-inset: #f7f5f0;
+  --border: #e8e3da;
+  --border-strong: #d9d2c4;
+
+  /* Ink */
+  --ink: #171614;
+  --ink-2: #4a4844;
+  --ink-3: #8a8681;
+
+  /* Accent — terracotta */
+  --accent: #c96442;
+  --accent-soft: rgba(201, 100, 66, 0.14);
+  --accent-border: rgba(201, 100, 66, 0.28);
+
+  /* Active / "ON" — sage */
+  --sage: #5c8068;
+  --sage-soft: rgba(92, 128, 104, 0.12);
+  --sage-border: rgba(92, 128, 104, 0.30);
+
+  /* Danger — muted */
+  --danger: #b04a3b;
+  --danger-soft: rgba(176, 74, 59, 0.10);
+  --danger-border: rgba(176, 74, 59, 0.28);
+
+  /* Shadows */
+  --shadow-xs: 0 1px 2px rgba(23, 22, 20, 0.05);
+  --shadow-sm: 0 2px 10px -2px rgba(23, 22, 20, 0.07);
+  --shadow-md: 0 16px 40px -16px rgba(23, 22, 20, 0.18);
+  --shadow-lg: 0 30px 70px -30px rgba(23, 22, 20, 0.28);
+
+  font-family: var(--font-body);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01' on, 'cv11' on, 'tnum' on;
+  transition: background 0.5s ease, color 0.5s ease;
 }
 
 .darkMode {
-  background: radial-gradient(circle at top left, #1e1e2f, #2a2a40);
-  color: #f9f9f9;
+  --bg: #0f0e0d;
+  --bg-elev: #161513;
+  --bg-card: #1a1917;
+  --bg-inset: #131210;
+  --border: #2a2825;
+  --border-strong: #3a3733;
+
+  --ink: #f0ede7;
+  --ink-2: #b6b1a8;
+  --ink-3: #7d7871;
+
+  --accent: #e07856;
+  --accent-soft: rgba(224, 120, 86, 0.16);
+  --accent-border: rgba(224, 120, 86, 0.34);
+
+  --sage: #8fb098;
+  --sage-soft: rgba(143, 176, 152, 0.14);
+  --sage-border: rgba(143, 176, 152, 0.34);
+
+  --danger: #e08070;
+  --danger-soft: rgba(224, 128, 112, 0.14);
+  --danger-border: rgba(224, 128, 112, 0.32);
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 2px 12px -2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 20px 50px -20px rgba(0, 0, 0, 0.7);
+  --shadow-lg: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
 }
 
+/* ------------------------------------------------------------------
+   1. CONTENT CONTAINER
+   ------------------------------------------------------------------ */
 .container {
-  max-width: 1400px;
-  min-height: auto;
-  margin: auto;
-  padding: 2rem;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.25rem, 4vw, 3rem)
+           clamp(4rem, 8vw, 7rem);
+  box-sizing: border-box;
 }
 
-/* ===== Header ===== */
+/* ------------------------------------------------------------------
+   2. HEADER + ROOM SWITCHER
+   ------------------------------------------------------------------ */
 .header {
-  text-align: center;
-  margin-bottom: 2rem;
-  animation: fadeSlideIn 1.2s ease both;
-}
-
-@keyframes fadeSlideIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
 .headerTitle {
-  font-size: 2.6rem;
-  font-weight: 700;
-  background: linear-gradient(90deg, #a18cd1, #fbc2eb, #84fab0);
-  background-size: 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 6s linear infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 200% 50%; }
-}
-
-.headerControls {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-/* ===== Room Buttons ===== */
-.roomButton {
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.25);
-  border: none;
-  backdrop-filter: blur(10px);
-  color: inherit;
-  cursor: pointer;
-  transition: all 0.4s ease;
   position: relative;
-  overflow: hidden;
+  margin: 0;
+  padding-left: 1.1rem;
+
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 3.6vw, 2.75rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.038em;
+  color: var(--ink);
+  text-wrap: balance;
+
+  border-left: 3px solid var(--accent);
 }
 
-.roomButton::before {
-  content: "";
-  position: absolute;
-  top: 0; left: -75%;
-  width: 50%; height: 100%;
-  background: linear-gradient(90deg, rgba(255,255,255,0.5), transparent);
-  transform: skewX(-20deg);
+/* Eyebrow label above the title, no JSX change required */
+.headerTitle::before {
+  content: 'Room control';
+  display: block;
+  margin-bottom: 0.5rem;
+
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
 
-.roomButton:hover::before {
-  animation: slideShine 0.75s ease;
+/* --- Room switcher pill row --- */
+.roomSwitchButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  padding-left: 1.1rem;
 }
 
-@keyframes slideShine {
-  to { left: 125%; }
+.roomButton {
+  position: relative;
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  white-space: nowrap;
+
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .roomButton:hover {
-  background: rgba(255, 255, 255, 0.45);
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  border-color: var(--border-strong);
+  color: var(--ink);
+  transform: translateY(-1px);
 }
 
+.roomButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Active room gets the "ink stamp" treatment */
 .activeRoom {
-  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
-  color: #222;
-  font-weight: 600;
-  box-shadow: 0 0 15px rgba(161,196,253,0.6);
-  animation: pulseGlow 2s infinite alternate;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  box-shadow: 0 6px 18px -6px rgba(23, 22, 20, 0.35);
 }
 
-@keyframes pulseGlow {
-  from { box-shadow: 0 0 10px rgba(161,196,253,0.3); }
-  to { box-shadow: 0 0 25px rgba(161,196,253,0.7); }
+.activeRoom:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
 }
 
-/* ===== Devices ===== */
-.deviceImage {
-  width: 60px;
-  height: 60px;
-  border-radius: 15px;
-  overflow: hidden;
-  background: #fff;
+/* Tiny dot indicator on the active chip */
+.activeRoom::before {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: 1px;
+  box-shadow: 0 0 0 0 var(--accent-soft);
+  animation: roomPulse 2.6s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes roomPulse {
+  0%, 100% { box-shadow: 0 0 0 0 var(--accent-soft); }
+  50%      { box-shadow: 0 0 0 6px transparent; }
+}
+
+/* ------------------------------------------------------------------
+   3. ERROR BANNER
+   ------------------------------------------------------------------ */
+.error {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 1.5rem;
+  padding: 0.9rem 1.1rem;
+
+  border-radius: 12px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  box-shadow: var(--shadow-xs);
+}
+
+/* ------------------------------------------------------------------
+   4. SENSOR PILLS
+   ------------------------------------------------------------------ */
+.sensorData {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 1.75rem;
+}
+
+.sensorItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem 0.55rem 0.7rem;
+
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
+
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+
+  transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+}
+
+.sensorItem:hover {
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+
+.sensorItem > svg {
   flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  color: var(--ink-3);
+  transition: color 0.3s ease;
 }
 
-.deviceImageStyle {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.sensorItem:hover > svg {
+  color: var(--accent);
 }
 
-.deviceName {
-  flex: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #000000;
+.sensorItem p {
+  margin: 0;
 }
 
-.deviceStatus {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
+/* ------------------------------------------------------------------
+   5. DEVICE GRID
+   ------------------------------------------------------------------ */
 .devicesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  position: relative;
-  z-index: 1;
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
 }
 
-/* ===== Device Card (Glass + Aurora + Animations) ===== */
+/* ------------------------------------------------------------------
+   6. DEVICE CARD
+   ------------------------------------------------------------------ */
 .deviceCard {
   position: relative;
-  border-radius: 20px;
-  padding: 1.2rem;
-  background: linear-gradient(
-    120deg,
-    #ff9a9e,
-    #fbc2eb,
-    #a6c1ee,
-    #84fab0,
-    #9cf455,
-
-  );
-  background-size: 300% 300%;
-  backdrop-filter: blur(14px) saturate(140%);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 
-  animation:
-    wingFlap 0.8s ease forwards,
-    floatCard 6s ease-in-out infinite,
-    auroraShift 15s ease infinite;
+  padding: 1rem 1.1rem 1rem 1rem;
+  border-radius: 15px;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-xs);
 
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, border-color, box-shadow;
+  transition:
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease,
+    box-shadow 0.35s ease,
+    background 0.35s ease;
 }
 
-.deviceCard::before {
-  content: "";
+/* Soft corner sheen that fades in */
+.deviceCard::after {
+  content: '';
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  z-index: 0;
-  border-radius: 20px;
-}
-
-.deviceCard > * {
-  position: relative;
-  z-index: 1;
+  border-radius: inherit;
+  background: radial-gradient(120% 100% at 0% 0%,
+                              var(--accent-soft), transparent 62%);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 
 .deviceCard:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
-
-/* ===== Animations ===== */
-@keyframes auroraShift {
-  0%   { background-position: 0% 50%; }
-  50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+.deviceCard:hover::after {
+  opacity: 1;
 }
 
-@keyframes floatCard {
-  0%   { transform: translateY(10px) scale(0.98); }
-  50%  { transform: translateY(0px) scale(1); }
-  100% { transform: translateY(10px) scale(0.98); }
+/* ------------------------------------------------------------------
+   7. ON STATE — auto-detected via :has() on the ToggleSwitch
+   Works with input[type=checkbox], [aria-checked=true], or [data-state=on]
+   ------------------------------------------------------------------ */
+.deviceCard:has(input:checked),
+.deviceCard:has([aria-checked='true']),
+.deviceCard:has([data-state='on']) {
+  border-color: var(--sage-border);
+  background: linear-gradient(180deg, var(--bg-card), var(--sage-soft));
 }
 
-@keyframes wingFlap {
-  0%   { transform: scale(0.8) rotate(5deg); opacity: 0; }
-  50%  { transform: scale(1.1) rotate(-5deg); opacity: 0.6; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
+.deviceCard:has(input:checked) .deviceIcon,
+.deviceCard:has([aria-checked='true']) .deviceIcon,
+.deviceCard:has([data-state='on']) .deviceIcon {
+  background: var(--sage-soft);
+  border-color: var(--sage-border);
+  color: var(--sage);
+  box-shadow: 0 0 0 4px var(--sage-soft);
 }
 
-@keyframes ripple {
-  0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
-  100% { box-shadow: 0 0 0 15px rgba(255,255,255,0); }
+/* Glowing right-edge indicator */
+.deviceCard:has(input:checked)::before,
+.deviceCard:has([aria-checked='true'])::before,
+.deviceCard:has([data-state='on'])::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 0;
+  width: 3px;
+  height: 62%;
+  transform: translateY(-50%);
+  border-radius: 3px 0 0 3px;
+  background: var(--sage);
+  animation: onGlow 2.8s ease-in-out infinite;
 }
 
-.deviceCard.toggled {
-  animation: ripple 0.6s ease;
+@keyframes onGlow {
+  0%, 100% { box-shadow: 0 0 12px var(--sage-border); opacity: 0.85; }
+  50%      { box-shadow: 0 0 22px var(--sage-border); opacity: 1; }
 }
 
-/* ================================
-   CONTROLS
-   ================================ */
-.controls {
-  margin-top: 2rem;
-  text-align: center;
+/* ------------------------------------------------------------------
+   8. DEVICE INFO ROW (icon + name + ellipsis)
+   ------------------------------------------------------------------ */
+.deviceInfo {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  min-width: 0;
 }
 
-.turnOffAll {
-  padding: 0.6rem 1.4rem;
-  border-radius: 30px;
-  background: #ff758c;
-  color: white;
-  border: none;
+.deviceName {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.deviceName > span {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+  line-height: 1.3;
+  color: var(--ink);
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The icon badge — react-icons render as inline <svg> */
+.deviceIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: 11px;
+  border: 1px solid var(--border);
+  background: var(--bg-inset);
+  color: var(--ink-2);
+
+  transition:
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1),
+    background 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.deviceCard:hover .deviceIcon {
+  transform: translateY(-1px) rotate(-3deg) scale(1.05);
+  border-color: var(--border-strong);
+  color: var(--accent);
+}
+
+.deviceCard:has(input:checked):hover .deviceIcon,
+.deviceCard:has([aria-checked='true']):hover .deviceIcon,
+.deviceCard:has([data-state='on']):hover .deviceIcon {
+  color: var(--sage);
+}
+
+/* --- Ellipsis menu --- */
+.editButton {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-3);
   cursor: pointer;
+  opacity: 0;
+
+  transition:
+    opacity 0.3s ease,
+    color 0.3s ease,
+    background 0.3s ease,
+    border-color 0.3s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.deviceCard:hover .editButton,
+.deviceCard:focus-within .editButton {
+  opacity: 1;
+}
+
+.editButton:hover {
+  background: var(--bg-inset);
+  border-color: var(--border);
+  color: var(--accent);
+  transform: rotate(90deg);
+}
+
+.editButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+/* Touch devices: always show the menu */
+@media (hover: none) {
+  .editButton { opacity: 1; }
+}
+
+.threeDots {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  transform: translateY(-3px);
+}
+
+/* ------------------------------------------------------------------
+   9. EDIT-IN-PLACE CONTROLS
+   ------------------------------------------------------------------ */
+.editDeviceControls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.editDeviceControls .input {
+  flex: 1 1 140px;
+  min-width: 0;
+}
+
+/* ------------------------------------------------------------------
+   10. DEVICE STATUS ROW (toggle + schedule)
+   ------------------------------------------------------------------ */
+.deviceStatus {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+}
+
+/* ------------------------------------------------------------------
+   11. BUTTONS — unified system
+   ------------------------------------------------------------------ */
+
+/* Base for text-based buttons so they share transitions */
+.addButton,
+.cancelButton,
+.removeButton,
+.scheduleButton,
+.turnOffAll {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+
+  font-family: var(--font-body);
+  font-size: 0.83rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+
+  border: 1px solid transparent;
+  transition:
+    background 0.28s ease,
+    border-color 0.28s ease,
+    color 0.28s ease,
+    transform 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.addButton:focus-visible,
+.cancelButton:focus-visible,
+.removeButton:focus-visible,
+.scheduleButton:focus-visible,
+.turnOffAll:focus-visible,
+.editButton:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- Primary: ink → terracotta on hover --- */
+.addButton {
+  background: var(--ink);
+  color: var(--bg);
+  border-color: var(--ink);
+}
+
+.addButton:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 8px 22px -8px var(--accent-border);
+}
+
+.addButton:active {
+  transform: translateY(1px);
+}
+
+/* --- Secondary: quiet outline --- */
+.cancelButton {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--border);
+}
+
+.cancelButton:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-inset);
+  color: var(--ink);
+}
+
+/* --- Danger: muted red outline --- */
+.removeButton {
+  background: transparent;
+  color: var(--danger);
+  border-color: var(--danger-border);
+}
+
+.removeButton:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+/* --- Ghost (schedule / edit room): hairline, ink text --- */
+.scheduleButton,
+.editButton[class*='headerControls'] {
+  background: transparent;
+  color: var(--ink-2);
+  border-color: var(--border);
+}
+
+.scheduleButton:hover {
+  background: var(--bg-inset);
+  border-color: var(--border-strong);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+
+/* --- Turn Off All: full-width terracotta-tinted action --- */
+.turnOffAll {
+  flex: 1 1 auto;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  background: var(--bg-card);
+  color: var(--ink);
+  border: 1px solid var(--border-strong);
+  font-size: 0.9rem;
+}
+
+.turnOffAll:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  box-shadow: 0 10px 26px -10px var(--accent-border);
+}
+
+.turnOffAll:active {
+  transform: translateY(1px);
+}
+
+/* ------------------------------------------------------------------
+   12. BOTTOM CONTROLS BAR
+   ------------------------------------------------------------------ */
+.controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.75rem;
+  padding: 1rem 1.1rem;
+
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-xs);
 }
 
 .deviceStatusText {
-  margin-top: 0.8rem;
-  font-size: 1rem;
+  margin: 0;
+  padding-left: 1rem;
+  border-left: 1px solid var(--border);
+
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-/* ================================
-   MODALS
-   ================================ */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.5);
-  backdrop-filter: blur(6px);
+/* ------------------------------------------------------------------
+   13. HEADER CONTROLS (Edit Room / Remove Room)
+   ------------------------------------------------------------------ */
+.headerControls {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
 }
 
-.modal {
-  background: rgba(255, 255, 255, 0.25);
-  padding: 2rem;
-  border-radius: 20px;
-  max-width: 500px;
-  width: 100%;
-  backdrop-filter: blur(15px);
-}
-
-.modalTitle {
-  font-size: 1.8rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
+/* ------------------------------------------------------------------
+   14. INPUTS
+   ------------------------------------------------------------------ */
 .input {
   width: 100%;
-  padding: 0.6rem;
+  box-sizing: border-box;
+  padding: 0.7rem 0.85rem;
+
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  background: var(--bg-inset);
+
   border-radius: 10px;
-  border: none;
-  margin-bottom: 1rem;
+  border: 1px solid var(--border-strong);
+  outline: none;
+
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease;
 }
 
-.inputFile {
-  margin-bottom: 1rem;
+.input::placeholder {
+  color: var(--ink-3);
+}
+
+.input:hover {
+  border-color: var(--border-strong);
+}
+
+.input:focus {
+  background: var(--bg-card);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.input[type='datetime-local'] {
+  font-variant-numeric: tabular-nums;
 }
 
 .inputLabel {
   display: block;
-  font-weight: 500;
-  margin-bottom: 0.5rem;
-}
+  margin-bottom: 0.9rem;
 
-/* ================================
-   BUTTONS
-   ================================ */
-.addButton {
-  display: inline-block;
-  margin: 1.8rem auto;
-  padding: 0.8rem 1.6rem;
-  border-radius: 30px;
-  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
-  border: none;
-  color: #222;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
   font-weight: 600;
-  cursor: pointer;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 
-.addButton:hover {
-  opacity: 0.9;
+.inputLabel .input {
+  margin-top: 0.4rem;
+  text-transform: none;
+  letter-spacing: -0.005em;
+  font-size: 0.9rem;
 }
 
-.cancelButton {
-  padding: 0.6rem 1.4rem;
-  border-radius: 30px;
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  cursor: pointer;
+/* ------------------------------------------------------------------
+   15. MODALS
+   ------------------------------------------------------------------ */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+
+  background: rgba(23, 22, 20, 0.42);
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
 }
 
-.cancelButton:hover {
-  opacity: 0.9;
+.darkMode .modalOverlay {
+  background: rgba(0, 0, 0, 0.55);
 }
 
-.editButton {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: inherit;
+.modal {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  overflow-y: auto;
+
+  padding: clamp(1.5rem, 3vw, 2rem);
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  box-shadow: var(--shadow-lg);
 }
 
-.removeButton {
-  padding: 0.4rem 1rem;
-  border-radius: 25px;
-  background: #ff4d6d;
-  color: white;
-  border: none;
-  cursor: pointer;
+/* Warm paper grain on the modal */
+.modal::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.09 0 0 0 0 0.08 0 0 0 0 0.07 0 0 0 0.05 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
 
-.scheduleButton {
-  padding: 0.4rem 1rem;
-  border-radius: 25px;
-  background: linear-gradient(90deg, #fbc2eb, #a6c1ee);
-  border: none;
-  cursor: pointer;
+.darkMode .modal::before {
+  mix-blend-mode: screen;
+  opacity: 0.45;
 }
 
-.roomSwitchButtons {
-  margin-top: 1.5rem;
+.modalTitle {
+  position: relative;
+  margin: 0 0 1.25rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--border);
+
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.modal .input {
+  margin-bottom: 0.75rem;
+}
+
+.modalButtons {
+  position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
 }
 
-.roomButton {
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  background: rgba(255, 255, 255, 0.25);
-  border: none;
-  backdrop-filter: blur(10px);
-  color: inherit;
-  cursor: pointer;
-  transition: all 0.3s ease;
+.modalButtons .addButton,
+.modalButtons .cancelButton {
+  flex: 1 1 0;
+  padding: 0.7rem 1rem;
+  font-size: 0.88rem;
 }
 
-.roomButton:hover {
-  background: rgba(255, 255, 255, 0.45);
+/* ------------------------------------------------------------------
+   16. RESPONSIVE
+   ------------------------------------------------------------------ */
+@media (max-width: 860px) {
+  .container {
+    padding: 2rem 1.25rem 4.5rem;
+  }
+
+  .header {
+    gap: 1.15rem;
+  }
+
+  .devicesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .deviceStatusText {
+    padding-left: 0;
+    padding-top: 0.75rem;
+    border-left: none;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
 }
 
-.activeRoom {
-  background: linear-gradient(90deg, #a1c4fd, #c2e9fb);
-  color: #222;
-  font-weight: 600;
+@media (max-width: 560px) {
+  .headerTitle {
+    font-size: clamp(1.5rem, 7.5vw, 2rem);
+    padding-left: 0.85rem;
+  }
+
+  .headerTitle::before {
+    font-size: 0.68rem;
+  }
+
+  .roomSwitchButtons,
+  .summary {
+    padding-left: 0.85rem;
+  }
+
+  .roomButton {
+    padding: 0.45rem 0.85rem;
+    font-size: 0.8rem;
+  }
+
+  .devicesGrid {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .sensorItem {
+    font-size: 0.8rem;
+    padding: 0.48rem 0.75rem 0.48rem 0.65rem;
+  }
+
+  .deviceCard {
+    padding: 0.85rem 0.9rem 0.85rem 0.85rem;
+  }
+
+  .deviceIcon {
+    width: 36px;
+    height: 36px;
+    padding: 9px;
+  }
+
+  .modal {
+    max-width: 100%;
+    border-radius: 16px;
+    padding: 1.35rem;
+  }
+
+  .modalButtons {
+    flex-direction: column;
+  }
+}
+
+/* ------------------------------------------------------------------
+   17. ACCESSIBILITY & POLISH
+   ------------------------------------------------------------------ */
+.container ::selection,
+.lightMode ::selection,
+.darkMode ::selection {
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+/* Reduced motion: kill all decorative motion */
+@media (prefers-reduced-motion: reduce) {
+  .roomButton,
+  .deviceCard,
+  .deviceIcon,
+  .editButton,
+  .addButton,
+  .cancelButton,
+  .removeButton,
+  .scheduleButton,
+  .turnOffAll,
+  .input,
+  .sensorItem {
+    transition-duration: 0.01ms !important;
+  }
+
+  .activeRoom::before,
+  .deviceCard::before {
+    animation: none !important;
+  }
 }
