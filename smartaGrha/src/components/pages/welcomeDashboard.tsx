@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion, type Variants } from 'framer-motion';
+import { motion, easeInOut } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import styles from '../pagesmodulecss/welcomeDashboard.module.css';
 
@@ -8,427 +8,526 @@ interface WelcomeDashboardProps {
   onToggleDarkMode: () => void;
 }
 
-/* --------------------------------------------------------------
-   Easing + variants
-   -------------------------------------------------------------- */
-const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
-
-const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: EASE } },
+const fadeFloatVariants = {
+  hidden: {
+    opacity: 0,
+    y: 40,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 1,
+      ease: easeInOut,
+    },
+  },
 };
 
-const stagger: Variants = {
+const staggerContainer = {
   hidden: {},
-  visible: { transition: { staggerChildren: 0.09, delayChildren: 0.08 } },
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
 };
 
-/* --------------------------------------------------------------
-   Content
-   -------------------------------------------------------------- */
-const HERO_LINES: { text: string; accent?: boolean }[][] = [
-  [
-    { text: 'A' },
-    { text: 'quieter', accent: true },
-    { text: 'way' },
-  ],
-  [
-    { text: 'to' },
-    { text: 'run' },
-    { text: 'your' },
-    { text: 'home.', accent: true },
-  ],
-];
-
-const FEATURES = [
-  {
-    icon: 'mdi:shield-lock-outline',
-    title: 'Private by default',
-    desc: 'Commands stay on your network. Nothing about your home leaves it unless you say so — no telemetry, no cloud dependency.',
-  },
-  {
-    icon: 'mdi:leaf-circle-outline',
-    title: 'Energy aware',
-    desc: 'Routines that quietly trim your monthly bill. No dashboards to babysit, no charts to interpret — just lower numbers.',
-  },
-  {
-    icon: 'mdi:home-analytics',
-    title: 'One calm surface',
-    desc: 'Lights, climate, cameras, power. Every device on one page, in the order you actually use them. Not a grid of icons.',
-  },
-];
-
-const WATERMARK_ICONS = [
-  'mdi:lightbulb-outline',
+// Smart home device icons from Iconify
+const deviceIcons = [
+  'mdi:lightbulb',
   'mdi:fan',
+  'mdi:television',
   'mdi:air-conditioner',
+  'mdi:fridge',
+  'mdi:air-humidifier',
+  'mdi:monitor',
   'mdi:router-wireless',
-  'mdi:speaker-wireless',
-  'mdi:home-thermometer-outline',
+  'mdi:speaker',
+  'mdi:home-theater',
+  'mdi:sparkle',
 ];
 
-const HERO_CHIPS = [
-  { text: '8 devices online', pos: 'Top' as const },
-  { text: '24.1°C · Living room', pos: 'Right' as const },
-  { text: '2 rooms active', pos: 'Bottom' as const },
+const features = [
+  {
+    icon: 'mdi:shield-lock',
+    title: 'Advanced Security',
+    desc: 'Keep your home protected with intelligent monitoring and secure automation designed for everyday peace of mind.',
+  },
+  {
+    icon: 'mdi:leaf',
+    title: 'Energy Efficient',
+    desc: 'Save energy with smart routines that automatically adapt your devices to how you live.',
+  },
+  {
+    icon: 'mdi:cellphone',
+    title: 'Easy Control',
+    desc: 'Manage your lights, appliances, climate and connected devices from one intuitive platform.',
+  },
 ];
 
-/* --------------------------------------------------------------
-   Page
-   -------------------------------------------------------------- */
 const WelcomeDashboard: React.FC<WelcomeDashboardProps> = ({
   darkMode,
   onToggleDarkMode,
 }) => {
   const navigate = useNavigate();
-  const handleGetStarted = () => navigate('/auth');
-  const handleSeeInside = () =>
-    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
 
-  const iconColor = darkMode ? '%23f0ede7' : '%230e0e0c';
+  const handleGetStarted = () => {
+    navigate('/auth');
+  };
 
   return (
     <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
-      {/* ---------- Watermark layer ---------- */}
+      {/* ============================================================
+          BACKGROUND WATERMARKS
+      ============================================================ */}
       <div className={styles.watermarks} aria-hidden="true">
-        {WATERMARK_ICONS.map((icon, i) => (
-          <motion.div
-            key={icon}
-            className={styles.watermark}
-            style={{
-              top: `${(i * 43) % 78 + 8}%`,
-              left: `${(i * 67) % 78 + 8}%`,
-            }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, y: [0, -12, 0] }}
-            transition={{
-              opacity: { duration: 1, delay: i * 0.1 },
-              y: {
-                duration: 8 + i * 0.7,
+        {Array.from({ length: 15 }).map((_, index) => {
+          const icon =
+            deviceIcons[Math.floor(Math.random() * deviceIcons.length)];
+
+          return (
+            <motion.div
+              key={index}
+              className={styles.watermark}
+              style={{
+                top: `${Math.random() * 90}%`,
+                left: `${Math.random() * 90}%`,
+              }}
+              initial={{ opacity: 0 }}
+              animate={{
+                opacity: [0.15, 0.35, 0.15],
+                y: [0, -15, 0],
+                rotate: [0, 5, -5, 0],
+                scale: [1, 1.05, 1],
+              }}
+              transition={{
+                duration: 5 + Math.random() * 5,
                 repeat: Infinity,
+                repeatType: 'reverse',
                 ease: 'easeInOut',
-                delay: i * 0.3,
-              },
-            }}
-          >
-            <img
-              src={`https://api.iconify.design/${icon}.svg?color=${iconColor}`}
-              alt=""
-              className={styles.watermarkIcon}
-            />
-          </motion.div>
-        ))}
+                delay: Math.random() * 2,
+              }}
+            >
+              <img
+                src={`https://api.iconify.design/${icon}.svg?color=${
+                  darkMode ? '%23ffffff' : '%23000000'
+                }`}
+                alt=""
+                className={styles.watermarkIcon}
+              />
+            </motion.div>
+          );
+        })}
       </div>
 
-      {/* Soft accent halo behind hero */}
+      {/* Hero ambient glow */}
       <div className={styles.heroHalo} aria-hidden="true" />
 
-      {/* ---------- Nav ---------- */}
-      <motion.nav
-        className={styles.nav}
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: EASE }}
-      >
+      {/* ============================================================
+          NAVIGATION
+      ============================================================ */}
+      <nav className={styles.nav}>
         <div className={styles.brand}>
-          <span className={styles.brandMark}>SH</span>
-          <span className={styles.brandDivider} />
-          <span className={styles.brandTag}>SmartHome</span>
+          <div className={styles.brandMark}>SH</div>
+
+          <div className={styles.brandDivider} />
+
+          <span className={styles.brandTag}>
+            Smart Home Assistant
+          </span>
         </div>
 
-        <button
+        <motion.button
           type="button"
           onClick={onToggleDarkMode}
           className={styles.themeToggle}
-          aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          aria-label={
+            darkMode
+              ? 'Switch to light mode'
+              : 'Switch to dark mode'
+          }
         >
-          {darkMode ? (
-            <>
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
-              </svg>
-              Light
-            </>
-          ) : (
-            <>
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-              Dark
-            </>
-          )}
-        </button>
-      </motion.nav>
+          <span aria-hidden="true">
+            {darkMode ? '☀️' : '🌙'}
+          </span>
 
-      {/* ---------- Hero ---------- */}
-      <section className={styles.hero}>
+          {darkMode ? 'Light Mode' : 'Dark Mode'}
+        </motion.button>
+      </nav>
+
+      {/* ============================================================
+          HERO SECTION
+      ============================================================ */}
+      <motion.section
+        className={styles.hero}
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        {/* Hero Text */}
         <div className={styles.heroText}>
-          <motion.span
+          <motion.div
             className={styles.eyebrow}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
+            variants={fadeFloatVariants}
           >
-            <span className={styles.eyebrowDot} />
-            Now in early access
-          </motion.span>
+            <span
+              className={styles.eyebrowDot}
+              aria-hidden="true"
+            />
+            Intelligent living, simplified
+          </motion.div>
 
-          <h1 className={styles.heroTitle}>
-            {HERO_LINES.map((line, li) => (
-              <span key={li} className={styles.heroLine}>
-                {line.map((word, wi) => (
-                  <span key={`${li}-${wi}`} className={styles.wordWrap}>
-                    <motion.span
-                      className={styles.word}
-                      initial={{ y: '110%' }}
-                      animate={{ y: '0%' }}
-                      transition={{
-                        duration: 0.95,
-                        ease: EASE,
-                        delay: 0.25 + li * 0.3 + wi * 0.07,
-                      }}
-                    >
-                      {word.accent ? (
-                        <em className={styles.accent}>{word.text}</em>
-                      ) : (
-                        word.text
-                      )}
-                    </motion.span>
-                  </span>
-                ))}
+          <motion.h1
+            className={styles.heroTitle}
+            variants={fadeFloatVariants}
+          >
+            <span className={styles.heroLine}>
+              <span className={styles.wordWrap}>
+                <span className={styles.word}>Your</span>
               </span>
-            ))}
-          </h1>
+
+              <span className={styles.wordWrap}>
+                <span className={styles.word}>home.</span>
+              </span>
+            </span>
+
+            <span className={styles.heroLine}>
+              <span
+                className={`${styles.wordWrap} ${styles.accent}`}
+              >
+                Smarter.
+              </span>
+
+              <span className={styles.wordWrap}>
+                <span className={styles.word}>Effortless.</span>
+              </span>
+            </span>
+          </motion.h1>
 
           <motion.p
             className={styles.heroSubtitle}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.85, ease: EASE }}
+            variants={fadeFloatVariants}
           >
-            Every device, every room, one considered surface. Designed to feel
-            like less software — not more.
+            Control your connected home effortlessly with one
+            intelligent assistant. Bring comfort, security, energy
+            efficiency and simplicity together in one place.
           </motion.p>
 
           <motion.div
             className={styles.heroActions}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1, ease: EASE }}
+            variants={fadeFloatVariants}
           >
             <motion.button
               type="button"
-              className={styles.btnPrimary}
               onClick={handleGetStarted}
-              whileTap={{ scale: 0.98 }}
+              className={styles.btnPrimary}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Get started
+              Get Started
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
                 aria-hidden="true"
               >
-                <path d="M5 12h14M13 5l7 7-7 7" />
+                <path d="M5 12h14" />
+                <path d="m13 6 6 6-6 6" />
               </svg>
             </motion.button>
 
             <motion.button
               type="button"
+              onClick={onToggleDarkMode}
               className={styles.btnGhost}
-              onClick={handleSeeInside}
-              whileTap={{ scale: 0.98 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              See what&rsquo;s inside
+              <span aria-hidden="true">
+                {darkMode ? '☀️' : '🌙'}
+              </span>
+
+              {darkMode ? 'Light Mode' : 'Dark Mode'}
             </motion.button>
           </motion.div>
 
+          {/* Hero Meta */}
           <motion.div
             className={styles.heroMeta}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.15, ease: EASE }}
+            variants={fadeFloatVariants}
           >
             <div className={styles.heroMetaItem}>
-              <span className={styles.heroMetaValue}>11</span>
-              <span className={styles.heroMetaLabel}>Device classes</span>
+              <span className={styles.heroMetaValue}>01</span>
+              <span className={styles.heroMetaLabel}>
+                One Platform
+              </span>
             </div>
+
             <div className={styles.heroMetaItem}>
-              <span className={styles.heroMetaValue}>&lt; 80ms</span>
-              <span className={styles.heroMetaLabel}>Command latency</span>
+              <span className={styles.heroMetaValue}>24/7</span>
+              <span className={styles.heroMetaLabel}>
+                Smart Control
+              </span>
             </div>
+
             <div className={styles.heroMetaItem}>
-              <span className={styles.heroMetaValue}>Local</span>
-              <span className={styles.heroMetaLabel}>Data residency</span>
+              <span className={styles.heroMetaValue}>∞</span>
+              <span className={styles.heroMetaLabel}>
+                Possibilities
+              </span>
             </div>
           </motion.div>
         </div>
 
-        {/* ---------- Hero visual ---------- */}
-        <div className={styles.heroVisual}>
+        {/* ========================================================
+            HERO VISUAL
+        ======================================================== */}
+        <motion.div
+          className={styles.heroVisual}
+          variants={fadeFloatVariants}
+        >
           <div className={styles.visualRings} aria-hidden="true">
-            <span className={styles.visualRing} />
-            <span className={styles.visualRing} />
-            <span className={styles.visualRing} />
+            <div className={styles.visualRing} />
+            <div className={styles.visualRing} />
+            <div className={styles.visualRing} />
           </div>
 
           <motion.div
             className={styles.visualCore}
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, delay: 0.5, ease: EASE }}
+            animate={{
+              scale: [1, 1.02, 1],
+            }}
+            transition={{
+              duration: 5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
           >
             <div className={styles.visualCoreInner}>
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.7"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+                strokeWidth="1.6"
                 aria-hidden="true"
               >
-                <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z" />
+                <path d="M12 3v2" />
+                <path d="M12 19v2" />
+                <path d="m4.93 4.93 1.41 1.41" />
+                <path d="m17.66 17.66 1.41 1.41" />
+                <path d="M3 12h2" />
+                <path d="M19 12h2" />
+                <path d="m4.93 19.07 1.41-1.41" />
+                <path d="m17.66 6.34 1.41-1.41" />
+                <circle cx="12" cy="12" r="4" />
               </svg>
             </div>
           </motion.div>
 
-          {HERO_CHIPS.map((chip, i) => (
-            <motion.span
-              key={chip.text}
-              className={`${styles.visualChip} ${
-                styles[`visualChip${chip.pos}`]
-              }`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.85 + i * 0.15, ease: EASE }}
-            >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="12" r="3" />
-              </svg>
-              {chip.text}
-            </motion.span>
-          ))}
-        </div>
-      </section>
-
-      {/* ---------- Features ---------- */}
-      <section id="features" className={styles.whyChoose}>
-        <motion.div
-          className={styles.whyHeader}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.75, ease: EASE }}
-        >
-          <span className={styles.whyLabel}>What&rsquo;s inside</span>
-          <h2 className={styles.whyTitle}>
-            Built for the way you actually live.
-          </h2>
-          <p className={styles.whyCopy}>
-            Three principles, in order of how much they matter. Everything else
-            is a detail.
-          </p>
-        </motion.div>
-
-        <motion.div
-          className={styles.featureList}
-          variants={stagger}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-        >
-          {FEATURES.map((f, i) => (
-            <motion.div
-              key={f.title}
-              className={styles.featureRow}
-              variants={fadeUp}
-            >
-              <span className={styles.featureIndex}>
-                {String(i + 1).padStart(2, '0')}
-              </span>
-
-              <div className={styles.featureBody}>
-                <h3 className={styles.featureTitle}>{f.title}</h3>
-                <p className={styles.featureDesc}>{f.desc}</p>
-              </div>
-
-              <span className={styles.featureIcon}>
-                <img
-                  src={`https://api.iconify.design/${f.icon}.svg?color=${iconColor}`}
-                  alt=""
-                />
-              </span>
-            </motion.div>
-          ))}
-        </motion.div>
-      </section>
-
-      {/* ---------- CTA ---------- */}
-      <section className={styles.cta}>
-        <motion.div
-          className={styles.ctaPanel}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.8, ease: EASE }}
-        >
-          <span className={styles.ctaEyebrow}>Ready when you are</span>
-
-          <h2 className={styles.ctaTitle}>
-            Bring your home <em className={styles.ctaAccent}>into focus.</em>
-          </h2>
-
-          <p className={styles.ctaCopy}>
-            Setup takes about five minutes. No subscription, no lock-in, and
-            your data stays on your network.
-          </p>
-
-          <motion.button
-            type="button"
-            className={styles.ctaButton}
-            onClick={handleGetStarted}
-            whileTap={{ scale: 0.98 }}
+          {/* Floating telemetry chips */}
+          <motion.div
+            className={`${styles.visualChip} ${styles.visualChipTop}`}
+            animate={{
+              y: [0, -8, 0],
+            }}
+            transition={{
+              duration: 4,
+              repeat: Infinity,
+              ease: 'easeInOut',
+            }}
           >
-            Get started
             <svg
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
               aria-hidden="true"
             >
-              <path d="M5 12h14M13 5l7 7-7 7" />
+              <path d="M12 3v18" />
+              <path d="M5 8h14" />
+              <path d="M7 16h10" />
+            </svg>
+            HOME ONLINE
+          </motion.div>
+
+          <motion.div
+            className={`${styles.visualChip} ${styles.visualChipRight}`}
+            animate={{
+              y: [0, 8, 0],
+            }}
+            transition={{
+              duration: 4.5,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 0.5,
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M12 3v18" />
+              <path d="M5 8h14" />
+              <path d="M7 16h10" />
+            </svg>
+            12 DEVICES
+          </motion.div>
+
+          <motion.div
+            className={`${styles.visualChip} ${styles.visualChipBottom}`}
+            animate={{
+              y: [0, -7, 0],
+            }}
+            transition={{
+              duration: 4.2,
+              repeat: Infinity,
+              ease: 'easeInOut',
+              delay: 1,
+            }}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M12 2v20" />
+              <path d="M5 7h14" />
+              <path d="M5 17h14" />
+            </svg>
+            SMART MODE
+          </motion.div>
+        </motion.div>
+      </motion.section>
+
+      {/* ============================================================
+          WHY CHOOSE SECTION
+      ============================================================ */}
+      <motion.section
+        className={styles.whyChoose}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: true, amount: 0.2 }}
+        variants={staggerContainer}
+      >
+        <div className={styles.whyHeader}>
+          <motion.span
+            className={styles.whyLabel}
+            variants={fadeFloatVariants}
+          >
+            Why choose us
+          </motion.span>
+
+          <motion.h2
+            className={styles.whyTitle}
+            variants={fadeFloatVariants}
+          >
+            A calmer way to manage the place you call home.
+          </motion.h2>
+
+          <motion.p
+            className={styles.whyCopy}
+            variants={fadeFloatVariants}
+          >
+            Your smart home should feel invisible when everything
+            works and effortless when you need control. Our platform
+            brings your connected devices together without adding
+            complexity to your everyday life.
+          </motion.p>
+        </div>
+
+        {/* Feature List */}
+        <div className={styles.featureList}>
+          {features.map((item, index) => (
+            <motion.div
+              key={item.title}
+              className={styles.featureRow}
+              variants={fadeFloatVariants}
+              whileHover={{ x: 4 }}
+              transition={{
+                type: 'spring',
+                stiffness: 200,
+                damping: 20,
+              }}
+            >
+              <div className={styles.featureIndex}>
+                {String(index + 1).padStart(2, '0')}
+              </div>
+
+              <div className={styles.featureBody}>
+                <h3 className={styles.featureTitle}>
+                  {item.title}
+                </h3>
+
+                <p className={styles.featureDesc}>
+                  {item.desc}
+                </p>
+              </div>
+
+              <div className={styles.featureIcon}>
+                <img
+                  src={`https://api.iconify.design/${item.icon}.svg?color=${
+                    darkMode ? '%23ffffff' : '%23000000'
+                  }`}
+                  alt=""
+                />
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      </motion.section>
+
+      {/* ============================================================
+          CALL TO ACTION
+      ============================================================ */}
+      <section className={styles.cta}>
+        <motion.div
+          className={styles.ctaPanel}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.25 }}
+          variants={fadeFloatVariants}
+        >
+          <span className={styles.ctaEyebrow}>
+            Start your smart home journey
+          </span>
+
+          <h2 className={styles.ctaTitle}>
+            Ready to transform your home into something{' '}
+            <span className={styles.ctaAccent}>
+              smarter?
+            </span>
+          </h2>
+
+          <p className={styles.ctaCopy}>
+            Glide into smarter living with effortless control,
+            thoughtful automation and a home that works around you.
+          </p>
+
+          <motion.button
+            type="button"
+            onClick={handleGetStarted}
+            className={styles.ctaButton}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Get Started Today!
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="m13 6 6 6-6 6" />
             </svg>
           </motion.button>
         </motion.div>
