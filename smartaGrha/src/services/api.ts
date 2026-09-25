@@ -169,5 +169,134 @@ export const updateProfile = (formData: FormData) =>
   api.put("/user/profile", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
-  
+
+// Chatbot/src/services/api.ts
+// Change BASE_URL to your deployed backend URL in production
+
+// ─────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────
+
+export interface Conversation {
+  id: number;
+  title: string;
+  created_at: string;
+}
+
+export interface Message {
+  role: "user" | "assistant";
+  content: string;
+  created_at?: string;
+}
+
+export interface ChatResponse {
+  reply: string;
+  conversation_id: number;
+}
+
+// ─────────────────────────────────────────────────────
+// STT — Send audio blob → get transcribed text
+// ─────────────────────────────────────────────────────
+
+export async function transcribeAudio(blob: Blob): Promise<string> {
+  const form = new FormData();
+  form.append("audio", blob, "recording.webm");
+
+  const res = await fetch(`${API_BASE_URL}/transcribe`, {
+    method: "POST",
+    body: form,
+  });
+
+  if (!res.ok) {
+    throw new Error(`Transcription failed (${res.status})`);
+  }
+
+  const data = await res.json();
+  return (data.text as string).trim();
+}
+
+// ─────────────────────────────────────────────────────
+// CHAT — Send message → get AI reply
+// ─────────────────────────────────────────────────────
+
+export async function sendChat(
+  message: string,
+  conversationId: number | null = null
+): Promise<ChatResponse> {
+  const res = await fetch(`${API_BASE_URL}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message,
+      conversation_id: conversationId,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Chat request failed (${res.status})`);
+  }
+
+  return res.json() as Promise<ChatResponse>;
+}
+
+// ─────────────────────────────────────────────────────
+// TTS — Send text → get playable audio object URL
+// ─────────────────────────────────────────────────────
+
+export async function textToSpeech(
+  text: string,
+  lang = "en"
+): Promise<string> {
+  const res = await fetch(`${API_BASE_URL}/speak`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, lang }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`TTS failed (${res.status})`);
+  }
+
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);   // caller must revoke when done
+}
+
+// ─────────────────────────────────────────────────────
+// CONVERSATIONS — list, open, delete, rename
+// ─────────────────────────────────────────────────────
+
+export async function getConversations(): Promise<Conversation[]> {
+  const res = await fetch(`${API_BASE_URL}/conversations`);
+  if (!res.ok) throw new Error("Failed to load conversations");
+  return res.json();
+}
+
+export async function getConversationMessages(
+  convId: number
+): Promise<Message[]> {
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/messages`);
+  if (!res.ok) throw new Error("Failed to load messages");
+  return res.json();
+}
+
+export async function deleteConversation(convId: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete conversation");
+}
+
+export async function renameConversation(
+  convId: number,
+  title: string
+): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/title`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw new Error("Failed to rename conversation");
+}
+
+
 export default api;
