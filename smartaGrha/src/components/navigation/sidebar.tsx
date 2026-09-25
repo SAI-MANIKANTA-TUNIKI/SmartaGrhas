@@ -47,12 +47,12 @@ export const SidebarData = [
     cName: 'nav-text',
   },
 
-{
-  title: 'AIChatbot',
-  path: '/Aichatbot',
-  icon: <AiOutlineRobot />,
-  cName: 'nav-text',
-},
+  {
+    title: 'AIChatbot',
+    path: '/Aichatbot',
+    icon: <AiOutlineRobot />,
+    cName: 'nav-text',
+  },,
 
 
   {
