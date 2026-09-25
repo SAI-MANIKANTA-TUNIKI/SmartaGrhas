@@ -28,14 +28,7 @@ import {
 
 import styles from '../pagesmodulecss/chatdashboard.module.css';
 
-import {
-  getConversations,
-  textToSpeech,
-  sendChat,
-  getConversationMessages,
-  deleteConversation,
-  transcribeAudio,
-} from '../../services/api';
+import * as api from '../../services/api';
 
 import type {
   Conversation,
