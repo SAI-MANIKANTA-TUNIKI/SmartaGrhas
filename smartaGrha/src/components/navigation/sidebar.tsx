@@ -1,6 +1,7 @@
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
 import * as IoIcons from 'react-icons/io';
+import { AiOutlineRobot } from 'react-icons/ai';
 
 export const SidebarData = [
   {
@@ -45,12 +46,14 @@ export const SidebarData = [
     icon: <AiIcons.AiFillWechat />,
     cName: 'nav-text',
   },
+
 {
-  title: "ChatDashboard",
-  path: "/Aichatbot",
+  title: 'ChatDashboard',
+  path: '/Aichatbot',
   icon: <AiOutlineRobot />,
-  cName: "nav-text",
+  cName: 'nav-text',
 },
+
 
   {
     title: 'Settings',
