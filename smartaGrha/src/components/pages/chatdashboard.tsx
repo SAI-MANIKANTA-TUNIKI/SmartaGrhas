@@ -7,7 +7,9 @@ import React, {
   useRef,
   useCallback,
 } from 'react';
+
 import { motion, AnimatePresence } from 'framer-motion';
+
 import {
   Mic,
   Send,
@@ -23,11 +25,22 @@ import {
   X,
   Menu,
 } from 'lucide-react';
-import styles from '../pagesmodulecss/chatdashboard.module.css';
-//import * as api from '../../services/api';
-//import type { Conversation, Message } from '../../services/api';
-import api, { Conversation, Message } from "../../services/api";
 
+import styles from '../pagesmodulecss/chatdashboard.module.css';
+
+import {
+  getConversations,
+  textToSpeech,
+  sendChat,
+  getConversationMessages,
+  deleteConversation,
+  transcribeAudio,
+} from '../../services/api';
+
+import type {
+  Conversation,
+  Message,
+} from '../../services/api';
 
 type Status =
   | 'idle'
@@ -90,12 +103,13 @@ const STATUS_DOT: Record<Status, string> = {
 };
 
 const HINTS = [
-  'What can you do?',
   "Today's AI news",
   'Tell me a fun fact',
 ];
 
-export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) {
+//export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) {
+  const ChatDashboard: React.FC<PowerSuplayProps> = ({ darkMode }) => {
+
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<number | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -775,4 +789,6 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
       </main>
     </div>
   );
-}
+};
+
+export default ChatDashboard;
