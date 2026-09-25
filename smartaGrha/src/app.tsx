@@ -16,6 +16,7 @@ import RoomControl from './components/pages/roomControl';
 import { getUserData } from './services/api'; // Your API function
 import NotificationDashboard from "./components/pages/notification";
 import DeviceDataDashboard from "./components/pages/deviceData";
+import ChatDashboard from './components/pages/chatdashdoard';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
@@ -102,7 +103,9 @@ const App: React.FC = () => {
           <Route path="/Notification" element={<PrivateRoute><NotificationDashboard darkMode ={darkMode} /></PrivateRoute>} />
           <Route path="/device-data" element={<PrivateRoute><DeviceDataDashboard darkMode={darkMode} /></PrivateRoute>} />
           <Route path="/room-control" element={<PrivateRoute><RoomControl darkMode={darkMode} onToggleDarkMode={toggleDarkMode} /></PrivateRoute>} />
+          <Route path="/Aichatbot" element={<PrivateRoute><chatdashboard darkMode={darkMode} onToggleDarkMode={toggleDarkMode} /></PrivateRoute>} />
           <Route path="/profile" element={<PrivateRoute><Profile/></PrivateRoute>} />
+         
           {/* Optional Routes */}
           {/* <Route path="/notification" element={<PrivateRoute><Notification /></PrivateRoute>} /> */}
           {/* <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} /> */}
