@@ -45,6 +45,13 @@ export const SidebarData = [
     icon: <AiIcons.AiFillWechat />,
     cName: 'nav-text',
   },
+{
+  title: "ChatDashboard",
+  path: "/Aichatbot",
+  icon: <AiOutlineRobot />,
+  cName: "nav-text",
+},
+
   {
     title: 'Settings',
     path: '/settings',
