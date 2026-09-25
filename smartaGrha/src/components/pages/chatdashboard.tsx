@@ -108,7 +108,7 @@ const HINTS = [
 ];
 
 //export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) {
-  const ChatDashboard: React.FC<PowerSuplayProps> = ({ darkMode }) => {
+  const ChatDashboard: React.FC<ChatDashboardProps> = ({ darkMode = false }) => {
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<number | null>(null);
