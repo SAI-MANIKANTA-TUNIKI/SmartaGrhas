@@ -54,9 +54,9 @@ const App: React.FC = () => {
 
   const toggleDarkMode = () => setDarkMode(prev => !prev);
 
-  const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-    return isAuthenticated ? children : <Navigate to="/welcome" />;
-  };
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  return isAuthenticated ? <>{children}</> : <Navigate to="/welcome" />;
+};
 
   if (loading) return <div>Loading...</div>;
 
@@ -104,7 +104,14 @@ const App: React.FC = () => {
           <Route path="/Notification" element={<PrivateRoute><NotificationDashboard darkMode ={darkMode} /></PrivateRoute>} />
           <Route path="/device-data" element={<PrivateRoute><DeviceDataDashboard darkMode={darkMode} /></PrivateRoute>} />
           <Route path="/room-control" element={<PrivateRoute><RoomControl darkMode={darkMode} onToggleDarkMode={toggleDarkMode} /></PrivateRoute>} />
-          <Route path="/Aichatbot" element={<PrivateRoute><ChatDashboard darkMode={darkMode} /> </PrivateRoute>} />
+          <Route 
+            path="/Aichatbot"
+            element={
+                <PrivateRoute>
+                <ChatDashboard darkMode={darkMode} />
+                </PrivateRoute>
+           }
+         />
 
           <Route path="/profile" element={<PrivateRoute><Profile/></PrivateRoute>} />
          
