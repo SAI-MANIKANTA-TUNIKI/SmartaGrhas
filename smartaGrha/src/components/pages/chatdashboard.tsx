@@ -24,7 +24,7 @@ import {
   Menu,
 } from 'lucide-react';
 import styles from '../pagesmodulecss/chatdashboard.module.css';
-import * as api from '../../services/api';
+//import * as api from '../../services/api';
 //import type { Conversation, Message } from '../../services/api';
 import api, { Conversation, Message } from "../../services/api";
 
