@@ -124,7 +124,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
 
   const loadConversations = useCallback(async () => {
     try {
-      const data = await API.getConversations();
+      const data = await api.getConversations();
       setConversations(data);
     } catch {
       // Non-critical
@@ -150,7 +150,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
     stopAudio();
     setStatus('speaking');
     try {
-      const url = await API.textToSpeech(text);
+      const url = await api.textToSpeech(text);
       const audio = new Audio(url);
       currentAudioRef.current = audio;
       void audio.play();
@@ -182,7 +182,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
     setStatus('thinking');
 
     try {
-      const res = await API.sendChat(trimmed, activeConvIdRef.current);
+      const res = await api.sendChat(trimmed, activeConvIdRef.current);
       setActiveConvId(res.conversation_id);
       setMessages(prev => [...prev, { role: 'assistant', content: res.reply }]);
       void loadConversations();
@@ -204,7 +204,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
     setSidebarOpen(false);
     setErrorMsg('');
     try {
-      const msgs = await API.getConversationMessages(convId);
+      const msgs = await api.getConversationMessages(convId);
       setMessages(msgs);
     } catch {
       setErrorMsg('Could not load conversation.');
@@ -228,7 +228,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
   ) => {
     e.stopPropagation();
     try {
-      await API.deleteConversation(convId);
+      await api.deleteConversation(convId);
       if (activeConvIdRef.current === convId) handleNewConversation();
       void loadConversations();
     } catch {
@@ -291,7 +291,7 @@ export default function ChatDashboard({ darkMode = false }: ChatDashboardProps) 
 
       setStatus('transcribing');
       try {
-        const text = await API.transcribeAudio(blob);
+        const text = await api.transcribeAudio(blob);
         const trimmed = text.trim();
         if (!trimmed) { 
           setStatus('idle'); 
