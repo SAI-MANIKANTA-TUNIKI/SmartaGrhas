@@ -1,5 +1,6 @@
 // src/App.tsx
-import React, { useState, useEffect, type JSX } from "react";
+//import React, { useState, useEffect, type JSX } from "react";
+import React, { useState, useEffect } from "react";
 import { HashRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import './app.css';
 import Navbar from './components/navigation/navbar';
