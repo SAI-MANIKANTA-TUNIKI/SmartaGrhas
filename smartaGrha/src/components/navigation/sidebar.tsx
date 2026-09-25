@@ -52,7 +52,7 @@ export const SidebarData = [
     path: '/Aichatbot',
     icon: <AiOutlineRobot />,
     cName: 'nav-text',
-  },,
+  },
 
 
   {
