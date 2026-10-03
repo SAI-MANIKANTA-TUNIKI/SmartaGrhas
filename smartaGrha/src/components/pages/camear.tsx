@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from '../pagesmodulecss/camear.module.css';
+
 import { getCameras, addCamera } from '../../services/api';
 
 interface Camera { _id: string; name: string; ip: string; userId: string; }
@@ -178,7 +179,7 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
       <header className={styles.topbar}>
         <div>
           <p className={styles.eyebrow}>Security · Cameras</p>
-          <h1 className={styles.title}>LiveView Hub</h1>
+          <h1 className={styles.title}>LiveView_2026</h1>
         </div>
 
         <div className={styles.toolbar}>
