@@ -10,6 +10,7 @@ import {
   getUserPreferences,
   updateUserPreferences,
   getUserData,
+  getSocket,
 } from "../../services/api";
 
 interface Notification {
@@ -132,10 +133,10 @@ useEffect(() => {
 
     joinSocketRoom();
 
-    socket.on("connect_error", (err) => {
-      setError("Failed to connect to real-time updates");
-      console.error("Socket.IO error:", err.message);
-    });
+socket.on("connect_error", (err: Error) => {
+  setError("Failed to connect to real-time updates");
+  console.error("Socket.IO error:", err.message);
+});
 
     socket.on("notification", (notification: Notification) => {
       if (
@@ -190,7 +191,7 @@ useEffect(() => {
             id="filter-dashboard"
             value={filterDashboard}
             onChange={(e) => {
-              setFilterDashboard(e.target.value);
+              setFilterEventType(e.target.value);
               fetchNotifications();
             }}
             className={styles.select}
