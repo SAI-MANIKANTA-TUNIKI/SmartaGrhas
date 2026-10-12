@@ -1,5 +1,6 @@
 // Client-side: src/services/api.ts
 import axios from "axios";
+import { io, Socket } from "socket.io-client";
 
 // Use environment variable for API base URL
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -17,6 +18,73 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ============================================================
+// SOCKET.IO CLIENT (iOS-safe reconnection)
+// ============================================================
+let socket: Socket | null = null;
+
+export const getSocket = (): Socket | null => socket;
+
+export const connectSocket = (userId: string): Socket => {
+  // Reuse existing socket if already connected to the same user
+  if (socket && socket.connected) return socket;
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+
+  socket = io(API_BASE_URL, {
+    transports: ["websocket", "polling"], // polling fallback helps iOS
+    withCredentials: true,
+    reconnection: true,
+    reconnectionAttempts: Infinity,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: 5000,
+    timeout: 20000,
+    autoConnect: true,
+    // Force a fresh connection on every reconnect (iOS keeps stale IDs)
+    forceNew: true,
+  });
+
+  socket.on("connect", () => {
+    console.log("[socket] connected:", socket?.id);
+    socket?.emit("join", userId);
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.warn("[socket] disconnected:", reason);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.error("[socket] connect_error:", err.message);
+  });
+
+  return socket;
+};
+
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.removeAllListeners();
+    socket.disconnect();
+    socket = null;
+  }
+};
+
+/**
+ * Force a fresh Socket.IO connection.
+ * Call this when iOS Safari returns to the foreground.
+ */
+export const reconnectSocket = (userId: string) => {
+  console.log("[socket] force-reconnecting...");
+  disconnectSocket();
+  return connectSocket(userId);
+};
+
+// ============================================================
+// All your existing API functions below (UNCHANGED)
+// ============================================================
+
 export const register = (data: { name: string; email: string; password: string }) =>
   api.post("/auth/register", data);
 
@@ -29,14 +97,12 @@ export const sendResetOtp = (data: { email: string }) => api.post("/auth/send-re
 export const resetPassword = (data: { email: string; otp: string; password: string }) =>
   api.post("/auth/reset-password", data);
 
-//export const getUserData = () => api.get("/user/data");
-
-export const addRoom = (data: { name: string; esp32_ip: string; device_id: string}) =>
+export const addRoom = (data: { name: string; esp32_ip: string; device_id: string }) =>
   api.post("/room/add", data);
 
 export const getRooms = () => api.get("/room/list");
 
-export const updateRoom = (roomId: string, data: { name: string; device_id: string}) => {
+export const updateRoom = (roomId: string, data: { name: string; device_id: string }) => {
   return api.put(`/room/update/${roomId}`, data);
 };
 export const deleteRoom = (roomId: string) => api.delete(`/room/delete/${roomId}`);
@@ -52,8 +118,6 @@ export const updateDevice = (
   relay_no: string,
   data: { type?: string; image_url?: string; is_on?: boolean }
 ) => api.put(`/room/device/update/${relay_no}`, data);
-
-
 
 export const deleteDevice = (relay_no: string) => api.delete(`/room/device/delete/${relay_no}`);
 
@@ -104,12 +168,10 @@ export const getLatestSensorData = async (device_id: string) => {
   }
 };
 
-
 export const getRoomWithSensorData = async (device_id: string) => {
   return api.get(`/room/list-with-sensor-data?device_id=${device_id}`);
 };
 
-//src/services/api.ts/Notification
 export const getNotifications = (params: { dashboard?: string; eventType?: string; limit?: number }) =>
   api.get("/notifications", { params });
 export const getUserPreferences = () => api.get("/preferences");
@@ -118,27 +180,21 @@ export const updateUserPreferences = (disabledEventTypes: string[]) =>
 export const getUserSettings = () => api.get("/settings");
 export const updateUserSettings = (disabledEventTypes: string[]) =>
   api.put("/settings", { disabledEventTypes });
-// src/services/api.ts
+
 export interface UserData {
   [x: string]: any;
-  id: string; // Or userId: string, depending on your API
-  // Add other fields as needed
+  id: string;
 }
 
 export const getUserData = (): Promise<{ data: UserData }> => api.get("/user/data");
 
-// Camera-specific API calls
 export const getCameras = () => api.get("/camera");
-
 export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
 
-// PowerSupply API calls
 export const getPowerEntries = (timeRange: string) => api.get(`/power/entries?timeRange=${timeRange}`);
 export const getRoomPowers = () => api.get("/power/room-powers");
 export const getDeviceStatuses = () => api.get("/power/device-statuses");
 
-
-// Same as previous, no new server APIs needed for music since it's direct to Jamendo
 export const getLedSettings = async (microcontroller: string) => {
   const response = await axios.get(`${API_BASE_URL}/${microcontroller}`);
   return response.data;
@@ -148,8 +204,7 @@ export const updateLedSettings = async (microcontroller: string, settings: any) 
   await axios.post(`${API_BASE_URL}/${microcontroller}`, settings);
 };
 
-//profile
-export interface UserData {
+export interface UserProfile {
   id: string;
   name: string;
   email: string;
@@ -161,20 +216,13 @@ export interface UserData {
   isAccountVerified: boolean;
 }
 
-// Update getUserData to return the extended UserData
-//export const getUserData = (): Promise<{ data: { userData: UserData } }> => api.get("/user/data");
-
-// Add updateProfile
 export const updateProfile = (formData: FormData) =>
   api.put("/user/profile", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
 
-// Chatbot/src/services/api.ts
-// Change BASE_URL to your deployed backend URL in production
-
 // ─────────────────────────────────────────────────────
-// TYPES
+// Chatbot types & functions (UNCHANGED)
 // ─────────────────────────────────────────────────────
 
 export interface Conversation {
@@ -194,10 +242,6 @@ export interface ChatResponse {
   conversation_id: number;
 }
 
-// ─────────────────────────────────────────────────────
-// STT — Send audio blob → get transcribed text
-// ─────────────────────────────────────────────────────
-
 export async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData();
   form.append("audio", blob, "recording.webm");
@@ -214,10 +258,6 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
   const data = await res.json();
   return (data.text as string).trim();
 }
-
-// ─────────────────────────────────────────────────────
-// CHAT — Send message → get AI reply
-// ─────────────────────────────────────────────────────
 
 export async function sendChat(
   message: string,
@@ -239,10 +279,6 @@ export async function sendChat(
   return res.json() as Promise<ChatResponse>;
 }
 
-// ─────────────────────────────────────────────────────
-// TTS — Send text → get playable audio object URL
-// ─────────────────────────────────────────────────────
-
 export async function textToSpeech(
   text: string,
   lang = "en"
@@ -258,12 +294,8 @@ export async function textToSpeech(
   }
 
   const blob = await res.blob();
-  return URL.createObjectURL(blob);   // caller must revoke when done
+  return URL.createObjectURL(blob);
 }
-
-// ─────────────────────────────────────────────────────
-// CONVERSATIONS — list, open, delete, rename
-// ─────────────────────────────────────────────────────
 
 export async function getConversations(): Promise<Conversation[]> {
   const res = await fetch(`${API_BASE_URL}/conversations`);
@@ -297,6 +329,5 @@ export async function renameConversation(
   });
   if (!res.ok) throw new Error("Failed to rename conversation");
 }
-
 
 export default api;
