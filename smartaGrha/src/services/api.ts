@@ -1,246 +1,45 @@
 // Client-side: src/services/api.ts
+import axios from "axios";
 
-import axios, { AxiosHeaders } from "axios";
-import { io, Socket } from "socket.io-client";
-
-// ============================================================
-// API CONFIGURATION
-// ============================================================
-
-const API_BASE_URL = String(
-  import.meta.env.VITE_API_BASE_URL ?? ""
-).replace(/\/+$/, "");
-
-if (!API_BASE_URL) {
-  throw new Error("VITE_API_BASE_URL is not configured");
-}
+// Use environment variable for API base URL
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const api = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
-  timeout: 30000,
-  headers: {
-    Accept: "application/json",
-  },
 });
 
-// ============================================================
-// TOKEN HELPERS
-// ============================================================
-
-export const getAuthToken = (): string | null => {
-  try {
-    return localStorage.getItem("token");
-  } catch {
-    console.warn("[auth] Unable to access localStorage");
-    return null;
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("token");
+  if (token && config.url && !config.url.includes("/room/sensor/report") && !config.url.includes("/room/device/status")) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
-};
+  return config;
+});
 
-// ============================================================
-// AXIOS REQUEST INTERCEPTOR
-// ============================================================
+export const register = (data: { name: string; email: string; password: string }) =>
+  api.post("/auth/register", data);
 
-api.interceptors.request.use(
-  (config) => {
-    const token = getAuthToken();
-    const url = config.url ?? "";
-
-    // Preserve the original backend exceptions.
-    const skipBearerToken =
-      url.includes("/room/sensor/report") ||
-      url.includes("/room/device/status");
-
-    config.headers = AxiosHeaders.from(config.headers);
-
-    if (token && !skipBearerToken) {
-      config.headers.set("Authorization", `Bearer ${token}`);
-    } else {
-      config.headers.delete("Authorization");
-    }
-
-    // Avoid modifying endpoint paths or adding trailing slashes.
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// ============================================================
-// AXIOS RESPONSE INTERCEPTOR
-// ============================================================
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error("[api] Request failed", {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      message: error.message,
-    });
-
-    return Promise.reject(error);
-  }
-);
-
-// ============================================================
-// SOCKET.IO CLIENT — iOS SAFARI COMPATIBLE
-// ============================================================
-
-let socket: Socket | null = null;
-let socketUserId: string | null = null;
-
-export const getSocket = (): Socket | null => socket;
-
-export const connectSocket = (userId: string): Socket => {
-  if (!userId) {
-    throw new Error("A valid userId is required");
-  }
-
-  // Reuse the connection for the same user.
-  if (socket && socketUserId === userId) {
-    if (!socket.connected && !socket.active) {
-      socket.connect();
-    }
-
-    return socket;
-  }
-
-  // Remove the previous socket when changing users.
-  if (socket) {
-    socket.removeAllListeners();
-    socket.disconnect();
-    socket = null;
-    socketUserId = null;
-  }
-
-  socketUserId = userId;
-
-  socket = io(API_BASE_URL, {
-    autoConnect: false,
-    forceNew: true,
-
-    withCredentials: true,
-
-    // WebSocket first, polling fallback.
-    transports: ["websocket", "polling"],
-
-    reconnection: true,
-    reconnectionAttempts: Infinity,
-    reconnectionDelay: 1000,
-    reconnectionDelayMax: 10000,
-    timeout: 20000,
-
-    // Supply the current token during the handshake.
-    // The backend must validate socket.handshake.auth.token.
-    auth: (callback) => {
-      callback({
-        token: getAuthToken(),
-      });
-    },
-  });
-
-  socket.on("connect", () => {
-    console.log("[socket] Connected:", socket?.id);
-
-    // Preserve your existing server-side join event.
-    socket?.emit("join", userId);
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.warn("[socket] Disconnected:", reason);
-
-    // Socket.IO does not automatically reconnect after
-    // a server-initiated disconnect.
-    if (reason === "io server disconnect") {
-      socket?.connect();
-    }
-  });
-
-  socket.on("connect_error", (error) => {
-    console.error("[socket] Connection error:", error.message);
-  });
-
-  socket.connect();
-
-  return socket;
-};
-
-// ============================================================
-// FORCE A FRESH SOCKET CONNECTION
-// Call when iOS Safari returns to the foreground.
-// ============================================================
-
-export const reconnectSocket = (userId: string): Socket => {
-  console.log("[socket] Reconnecting with a fresh connection");
-
-  disconnectSocket();
-
-  return connectSocket(userId);
-};
-
-// ============================================================
-// DISCONNECT SOCKET
-// ============================================================
-
-export const disconnectSocket = (): void => {
-  if (socket) {
-    socket.removeAllListeners();
-    socket.disconnect();
-    socket = null;
-    socketUserId = null;
-  }
-};
-
-// ============================================================
-// AUTH API
-// ============================================================
-
-export const register = (data: {
-  name: string;
-  email: string;
-  password: string;
-}) => api.post("/auth/register", data);
-
-export const login = (data: {
-  email: string;
-  password: string;
-}) => api.post("/auth/login", data);
+export const login = (data: { email: string; password: string }) => api.post("/auth/login", data);
 
 export const logout = () => api.post("/auth/logout");
 
-export const sendResetOtp = (data: { email: string }) =>
-  api.post("/auth/send-reset-otp", data);
+export const sendResetOtp = (data: { email: string }) => api.post("/auth/send-reset-otp", data);
 
-export const resetPassword = (data: {
-  email: string;
-  otp: string;
-  password: string;
-}) => api.post("/auth/reset-password", data);
+export const resetPassword = (data: { email: string; otp: string; password: string }) =>
+  api.post("/auth/reset-password", data);
 
-// ============================================================
-// ROOM API
-// ============================================================
+//export const getUserData = () => api.get("/user/data");
 
-export const addRoom = (data: {
-  name: string;
-  esp32_ip: string;
-  device_id: string;
-}) => api.post("/room/add", data);
+export const addRoom = (data: { name: string; esp32_ip: string; device_id: string}) =>
+  api.post("/room/add", data);
 
 export const getRooms = () => api.get("/room/list");
 
-export const updateRoom = (
-  roomId: string,
-  data: { name: string; device_id: string }
-) => api.put(`/room/update/${roomId}`, data);
-
-export const deleteRoom = (roomId: string) =>
-  api.delete(`/room/delete/${roomId}`);
-
-// ============================================================
-// DEVICE API
-// ============================================================
+export const updateRoom = (roomId: string, data: { name: string; device_id: string}) => {
+  return api.put(`/room/update/${roomId}`, data);
+};
+export const deleteRoom = (roomId: string) => api.delete(`/room/delete/${roomId}`);
 
 export const addDevice = (data: {
   room_id: string;
@@ -251,19 +50,12 @@ export const addDevice = (data: {
 
 export const updateDevice = (
   relay_no: string,
-  data: {
-    type?: string;
-    image_url?: string;
-    is_on?: boolean;
-  }
+  data: { type?: string; image_url?: string; is_on?: boolean }
 ) => api.put(`/room/device/update/${relay_no}`, data);
 
-export const deleteDevice = (relay_no: string) =>
-  api.delete(`/room/device/delete/${relay_no}`);
 
-// ============================================================
-// SCHEDULE API
-// ============================================================
+
+export const deleteDevice = (relay_no: string) => api.delete(`/room/device/delete/${relay_no}`);
 
 export const addSchedule = (data: {
   esp32_ip: string;
@@ -274,158 +66,90 @@ export const addSchedule = (data: {
 
 export const updateSchedule = (
   relay_no: string,
-  data: {
-    esp32_ip: string;
-    relay_no: number;
-    on_time: string | null;
-    off_time: string | null;
-  }
+  data: { esp32_ip: string; relay_no: number; on_time: string | null; off_time: string | null }
 ) => api.put(`/room/schedule/update/${relay_no}`, data);
 
-export const deleteSchedule = (
-  relay_no: string,
-  params: { esp32_ip: string }
-) => api.delete(`/room/schedule/delete/${relay_no}`, { params });
+export const deleteSchedule = (relay_no: string, params: { esp32_ip: string }) =>
+  api.delete(`/room/schedule/delete/${relay_no}`, { params });
 
 export const getSchedules = () => api.get("/room/schedule/list");
 
-// ============================================================
-// SENSOR API
-// ============================================================
-
-export const reportSensorData = async (data: {
-  device_id: string;
-  temperature: number;
-  humidity: number;
-}) => {
+export const reportSensorData = async (data: { device_id: string; temperature: number; humidity: number }) => {
   try {
-    return await api.post("/room/sensor/report", data);
+    const response = await api.post("/room/sensor/report", data);
+    return response;
   } catch (error: any) {
-    console.error(
-      "[sensor] Report failed:",
-      error.response?.data || error.message
-    );
+    console.error("Error reporting sensor data:", error.response?.data || error.message);
     throw error;
   }
 };
 
-export const reportDeviceStatus = async (data: {
-  esp32_ip: string;
-  relay_no: number;
-  is_on: boolean;
-}) => {
+export const reportDeviceStatus = async (data: { esp32_ip: string; relay_no: number; is_on: boolean }) => {
   try {
-    return await api.post("/room/device/status", data);
+    const response = await api.post("/room/device/status", data);
+    return response;
   } catch (error: any) {
-    console.error(
-      "[device] Status report failed:",
-      error.response?.data || error.message
-    );
+    console.error("Error reporting device status:", error.response?.data || error.message);
     throw error;
   }
 };
 
 export const getLatestSensorData = async (device_id: string) => {
   try {
-    return await api.get("/sensor/latest", {
-      params: { device_id },
-    });
+    const response = await api.get(`/sensor/latest?device_id=${device_id}`);
+    return response;
   } catch (error: any) {
-    console.error(
-      "[sensor] Fetch failed:",
-      error.response?.data || error.message
-    );
+    console.error(`Error fetching latest sensor data for device_id: ${device_id}:`, error.response?.data || error.message);
     throw error;
   }
 };
 
-export const getRoomWithSensorData = async (device_id: string) =>
-  api.get("/room/list-with-sensor-data", {
-    params: { device_id },
-  });
 
-// ============================================================
-// NOTIFICATIONS & PREFERENCES
-// ============================================================
+export const getRoomWithSensorData = async (device_id: string) => {
+  return api.get(`/room/list-with-sensor-data?device_id=${device_id}`);
+};
 
-export const getNotifications = (params: {
-  dashboard?: string;
-  eventType?: string;
-  limit?: number;
-}) => api.get("/notifications", { params });
-
+//src/services/api.ts/Notification
+export const getNotifications = (params: { dashboard?: string; eventType?: string; limit?: number }) =>
+  api.get("/notifications", { params });
 export const getUserPreferences = () => api.get("/preferences");
-
-export const updateUserPreferences = (
-  disabledEventTypes: string[]
-) => api.put("/preferences", { disabledEventTypes });
-
+export const updateUserPreferences = (disabledEventTypes: string[]) =>
+  api.put("/preferences", { disabledEventTypes });
 export const getUserSettings = () => api.get("/settings");
-
-export const updateUserSettings = (
-  disabledEventTypes: string[]
-) => api.put("/settings", { disabledEventTypes });
-
-// ============================================================
-// USER API
-// ============================================================
-
+export const updateUserSettings = (disabledEventTypes: string[]) =>
+  api.put("/settings", { disabledEventTypes });
+// src/services/api.ts
 export interface UserData {
   [x: string]: any;
-  id: string;
+  id: string; // Or userId: string, depending on your API
+  // Add other fields as needed
 }
 
-export const getUserData = (): Promise<{ data: UserData }> =>
-  api.get("/user/data");
+export const getUserData = (): Promise<{ data: UserData }> => api.get("/user/data");
 
+// Camera-specific API calls
 export const getCameras = () => api.get("/camera");
 
-export const addCamera = (data: {
-  name: string;
-  ip: string;
-}) => api.post("/camera", data);
+export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
 
-// ============================================================
-// POWER API
-// ============================================================
-
-export const getPowerEntries = (timeRange: string) =>
-  api.get("/power/entries", { params: { timeRange } });
-
+// PowerSupply API calls
+export const getPowerEntries = (timeRange: string) => api.get(`/power/entries?timeRange=${timeRange}`);
 export const getRoomPowers = () => api.get("/power/room-powers");
+export const getDeviceStatuses = () => api.get("/power/device-statuses");
 
-export const getDeviceStatuses = () =>
-  api.get("/power/device-statuses");
 
-// ============================================================
-// LED SETTINGS API
-// ============================================================
-
+// Same as previous, no new server APIs needed for music since it's direct to Jamendo
 export const getLedSettings = async (microcontroller: string) => {
-  const response = await axios.get(
-    `${API_BASE_URL}/${microcontroller}`,
-    { timeout: 30000, withCredentials: true }
-  );
-
+  const response = await axios.get(`${API_BASE_URL}/${microcontroller}`);
   return response.data;
 };
 
-export const updateLedSettings = async (
-  microcontroller: string,
-  settings: any
-) => {
-  await axios.post(
-    `${API_BASE_URL}/${microcontroller}`,
-    settings,
-    { timeout: 30000, withCredentials: true }
-  );
+export const updateLedSettings = async (microcontroller: string, settings: any) => {
+  await axios.post(`${API_BASE_URL}/${microcontroller}`, settings);
 };
 
-// ============================================================
-// PROFILE API
-// ============================================================
-
-export interface UserProfile {
+//profile
+export interface UserData {
   id: string;
   name: string;
   email: string;
@@ -437,12 +161,21 @@ export interface UserProfile {
   isAccountVerified: boolean;
 }
 
-export const updateProfile = (formData: FormData) =>
-  api.put("/user/profile", formData);
+// Update getUserData to return the extended UserData
+//export const getUserData = (): Promise<{ data: { userData: UserData } }> => api.get("/user/data");
 
-// ============================================================
-// CHATBOT TYPES
-// ============================================================
+// Add updateProfile
+export const updateProfile = (formData: FormData) =>
+  api.put("/user/profile", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+
+// Chatbot/src/services/api.ts
+// Change BASE_URL to your deployed backend URL in production
+
+// ─────────────────────────────────────────────────────
+// TYPES
+// ─────────────────────────────────────────────────────
 
 export interface Conversation {
   id: number;
@@ -461,45 +194,18 @@ export interface ChatResponse {
   conversation_id: number;
 }
 
-// ============================================================
-// CHATBOT AUTH HELPER
-// Uses fetch while preserving the original endpoints.
-// ============================================================
-
-async function authenticatedFetch(
-  url: string,
-  init: RequestInit = {}
-): Promise<Response> {
-  const headers = new Headers(init.headers);
-  const token = getAuthToken();
-
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-
-  // Native fetch does not inherit Axios configuration.
-  return fetch(url, {
-    ...init,
-    headers,
-    credentials: "include",
-  });
-}
-
-// ============================================================
-// SPEECH-TO-TEXT
-// ============================================================
+// ─────────────────────────────────────────────────────
+// STT — Send audio blob → get transcribed text
+// ─────────────────────────────────────────────────────
 
 export async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData();
   form.append("audio", blob, "recording.webm");
 
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/transcribe`,
-    {
-      method: "POST",
-      body: form,
-    }
-  );
+  const res = await fetch(`${API_BASE_URL}/transcribe`, {
+    method: "POST",
+    body: form,
+  });
 
   if (!res.ok) {
     throw new Error(`Transcription failed (${res.status})`);
@@ -509,27 +215,22 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
   return (data.text as string).trim();
 }
 
-// ============================================================
-// CHAT
-// ============================================================
+// ─────────────────────────────────────────────────────
+// CHAT — Send message → get AI reply
+// ─────────────────────────────────────────────────────
 
 export async function sendChat(
   message: string,
   conversationId: number | null = null
 ): Promise<ChatResponse> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/chat`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        message,
-        conversation_id: conversationId,
-      }),
-    }
-  );
+  const res = await fetch(`${API_BASE_URL}/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      message,
+      conversation_id: conversationId,
+    }),
+  });
 
   if (!res.ok) {
     throw new Error(`Chat request failed (${res.status})`);
@@ -538,98 +239,64 @@ export async function sendChat(
   return res.json() as Promise<ChatResponse>;
 }
 
-// ============================================================
-// TEXT-TO-SPEECH
-// ============================================================
+// ─────────────────────────────────────────────────────
+// TTS — Send text → get playable audio object URL
+// ─────────────────────────────────────────────────────
 
 export async function textToSpeech(
   text: string,
   lang = "en"
 ): Promise<string> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/speak`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ text, lang }),
-    }
-  );
+  const res = await fetch(`${API_BASE_URL}/speak`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text, lang }),
+  });
 
   if (!res.ok) {
     throw new Error(`TTS failed (${res.status})`);
   }
 
   const blob = await res.blob();
-  return URL.createObjectURL(blob);
+  return URL.createObjectURL(blob);   // caller must revoke when done
 }
 
-// ============================================================
-// CONVERSATIONS
-// ============================================================
+// ─────────────────────────────────────────────────────
+// CONVERSATIONS — list, open, delete, rename
+// ─────────────────────────────────────────────────────
 
 export async function getConversations(): Promise<Conversation[]> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/conversations`
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to load conversations");
-  }
-
+  const res = await fetch(`${API_BASE_URL}/conversations`);
+  if (!res.ok) throw new Error("Failed to load conversations");
   return res.json();
 }
 
 export async function getConversationMessages(
   convId: number
 ): Promise<Message[]> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/conversations/${convId}/messages`
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to load messages");
-  }
-
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/messages`);
+  if (!res.ok) throw new Error("Failed to load messages");
   return res.json();
 }
 
-export async function deleteConversation(
-  convId: number
-): Promise<void> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/conversations/${convId}`,
-    { method: "DELETE" }
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to delete conversation");
-  }
+export async function deleteConversation(convId: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) throw new Error("Failed to delete conversation");
 }
 
 export async function renameConversation(
   convId: number,
   title: string
 ): Promise<void> {
-  const res = await authenticatedFetch(
-    `${API_BASE_URL}/conversations/${convId}/title`,
-    {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title }),
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error("Failed to rename conversation");
-  }
+  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/title`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  if (!res.ok) throw new Error("Failed to rename conversation");
 }
 
-// ============================================================
-// DEFAULT EXPORT
-// ============================================================
 
 export default api;
