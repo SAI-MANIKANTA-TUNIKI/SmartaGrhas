@@ -31,20 +31,6 @@ import { getRooms, getLatestSensorData } from '../../services/api'; // ✅ remov
 
 import { getRooms, getLatestSensorData, getSocket } from '../../services/api';
 
-useEffect(() => {
-  fetchData();
-
-  const socket = getSocket();
-  if (!socket) return;
-
-  socket.on('connect', ...);
-  ...
-  return () => {
-    socket.off('connect');
-    ...
-  };
-  
-}, []);
 interface Device {
   _id: string;
   type: string;
@@ -130,6 +116,9 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
 
   useEffect(() => {
     fetchData();
+
+      const socket = getSocket();
+      if (!socket) return;
 
     socket.on('connect', () => {
       console.log('Socket.IO connected with ID:', socket.id);
