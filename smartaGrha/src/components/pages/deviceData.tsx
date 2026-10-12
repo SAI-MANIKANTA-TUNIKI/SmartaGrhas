@@ -84,6 +84,31 @@ const fetchWithRetry = async <T,>(fn: () => Promise<T>, retries = 2): Promise<T>
   }
   throw lastErr;
 };
+
+// deviceData.tsx — inside fetchData()
+const roomsResponse = await fetchWithRetry(() => getRooms());
+
+// notification.tsx — inside fetchNotifications()
+const response = await fetchWithRetry(() =>
+  getNotifications({ dashboard: filterDashboard, eventType: filterEventType, limit: 50 })
+);
+
+// roomControl.tsx — inside fetchRooms()
+const res = await fetchWithRetry(() => getRooms());
+} catch (err: any) {
+  const status = err.response?.status;
+  const msg = err.response?.data?.message || "";
+
+  // 401 after retries = token actually expired, not Safari dropping it
+  if (status === 401) {
+    // Optional: try one silent token refresh here before logging out
+    setError("Session expired. Please sign in again.");
+    // navigate("/"); // only do this if you're sure the token is dead
+  } else {
+    setError(msg || "Failed to fetch data");
+  }
+}
+  
   
   const fetchData = async () => {
     try {
