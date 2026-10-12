@@ -68,46 +68,6 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
     FaVolumeUp,
     FaFilm,
   ];
-
-// At the top of each file, add a small retry helper
-const fetchWithRetry = async <T,>(fn: () => Promise<T>, retries = 2): Promise<T> => {
-  let lastErr: any;
-  for (let i = 0; i <= retries; i++) {
-    try {
-      return await fn();
-    } catch (err: any) {
-      lastErr = err;
-      // Only retry on 401 – that's the Safari header-drop symptom
-      if (err.response?.status !== 401 || i === retries) throw err;
-      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
-    }
-  }
-  throw lastErr;
-};
-
-// deviceData.tsx — inside fetchData()
-const roomsResponse = await fetchWithRetry(() => getRooms());
-
-// notification.tsx — inside fetchNotifications()
-const response = await fetchWithRetry(() =>
-  getNotifications({ dashboard: filterDashboard, eventType: filterEventType, limit: 50 })
-);
-
-// roomControl.tsx — inside fetchRooms()
-const res = await fetchWithRetry(() => getRooms());
-} catch (err: any) {
-  const status = err.response?.status;
-  const msg = err.response?.data?.message || "";
-
-  // 401 after retries = token actually expired, not Safari dropping it
-  if (status === 401) {
-    // Optional: try one silent token refresh here before logging out
-    setError("Session expired. Please sign in again.");
-    // navigate("/"); // only do this if you're sure the token is dead
-  } else {
-    setError(msg || "Failed to fetch data");
-  }
-}
   
   
   const fetchData = async () => {
