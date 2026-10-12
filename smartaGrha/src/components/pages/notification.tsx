@@ -191,7 +191,7 @@ socket.on("connect_error", (err: Error) => {
             id="filter-dashboard"
             value={filterDashboard}
             onChange={(e) => {
-              setFilterEventType(e.target.value);
+              setFilterDashboard(e.target.value);
               fetchNotifications();
             }}
             className={styles.select}
