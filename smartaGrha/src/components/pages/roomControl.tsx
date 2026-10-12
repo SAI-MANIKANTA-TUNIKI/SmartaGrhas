@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useAnimation, useMotionValue, useTransform } from "framer-motion";
-import io from "socket.io-client";
+
 import {
   addRoom,
   addDevice,
@@ -15,7 +15,9 @@ import {
   deleteSchedule,
   getSchedules,
   getLatestSensorData,
+  getSocket,
 } from "../../services/api";
+
 import ToggleSwitch from "../toggleswitch/toggleswitch";
 import styles from "../pagesmodulecss/roomControl.module.css";
 import { FaPlug, FaBlender, FaWifi, FaTv, FaLightbulb, FaFan, FaDesktop } from 'react-icons/fa';
@@ -25,8 +27,6 @@ import { TbAirConditioning } from 'react-icons/tb';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
 import { RiFridgeFill } from 'react-icons/ri';
 import { GiAirZigzag } from 'react-icons/gi';
-
-const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
 
 interface DeviceConfig {
   type: string;
@@ -315,7 +315,9 @@ const RoomControl: React.FC<RoomProps> = ({ darkMode }) => {
   useEffect(() => {
     fetchRooms();
     fetchSchedules();
-
+    const socket = getSocket();
+    if (!socket) return;
+    
     socket.on("deviceUpdated", (data: { roomId: string; device: DeviceConfig }) => {
       if (currentRoom && data.roomId === currentRoom._id) {
         const relayKey = String(data.device.relay_no);
