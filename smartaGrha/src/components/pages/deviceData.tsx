@@ -69,6 +69,22 @@ const DeviceData: React.FC<DeviceDataProps> = ({ darkMode }) => {
     FaFilm,
   ];
 
+// At the top of each file, add a small retry helper
+const fetchWithRetry = async <T,>(fn: () => Promise<T>, retries = 2): Promise<T> => {
+  let lastErr: any;
+  for (let i = 0; i <= retries; i++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      lastErr = err;
+      // Only retry on 401 – that's the Safari header-drop symptom
+      if (err.response?.status !== 401 || i === retries) throw err;
+      await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    }
+  }
+  throw lastErr;
+};
+  
   const fetchData = async () => {
     try {
       setLoading(true);
