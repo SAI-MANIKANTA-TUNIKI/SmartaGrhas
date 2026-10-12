@@ -24,11 +24,9 @@ import {
 } from 'react-icons/fa';
 import { MdAcUnit, MdKitchen, MdMicrowave } from 'react-icons/md';
 import { WiHumidity, WiThermometer } from 'react-icons/wi';
-import { GiWashingMachine, GiHairStrands } from 'react-icons/gi'; // ✅ replaced HairDryer
-import { TbAirConditioning } from 'react-icons/tb'; // ✅ removed AirPurifier
+import { GiWashingMachine, GiHairStrands } from 'react-icons/gi';
+import { TbAirConditioning } from 'react-icons/tb';
 import styles from '../pagesmodulecss/deviceData.module.css';
-import { getRooms, getLatestSensorData } from '../../services/api'; // ✅ removed updateDevice
-
 import { getRooms, getLatestSensorData, getSocket } from '../../services/api';
 
 interface Device {
