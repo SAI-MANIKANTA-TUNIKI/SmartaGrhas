@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import io from 'socket.io-client';
+
 import {
   FaEllipsisH,
   FaBed,
@@ -29,8 +29,22 @@ import { TbAirConditioning } from 'react-icons/tb'; // ✅ removed AirPurifier
 import styles from '../pagesmodulecss/deviceData.module.css';
 import { getRooms, getLatestSensorData } from '../../services/api'; // ✅ removed updateDevice
 
-const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
+import { getRooms, getLatestSensorData, getSocket } from '../../services/api';
 
+useEffect(() => {
+  fetchData();
+
+  const socket = getSocket();
+  if (!socket) return;
+
+  socket.on('connect', ...);
+  ...
+  return () => {
+    socket.off('connect');
+    ...
+  };
+  
+}, []);
 interface Device {
   _id: string;
   type: string;
