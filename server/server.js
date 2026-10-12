@@ -48,8 +48,11 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
-  pingTimeout: 60000, // Increased to prevent idle disconnects on Render
+  transports: ["websocket", "polling"], 
+  allowUpgrades: true,
+  pingTimeout: 60000,
   pingInterval: 25000,
+  maxHttpBufferSize: 1e6,
 });
 
 const PORT = process.env.PORT || 5000;
