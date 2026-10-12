@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import io from "socket.io-client";
+
 import styles from "../pagesmodulecss/notification.module.css";
 import {
   getNotifications,
@@ -11,7 +11,13 @@ import {
   getUserData,
 } from "../../services/api";
 
-const socket = io(import.meta.env.VITE_WEBSOCKET_URL, { withCredentials: true });
+import {
+  getNotifications,
+  getUserPreferences,
+  updateUserPreferences,
+  getUserData,
+  getSocket,
+} from "../../services/api";
 
 interface Notification {
   _id: string;
@@ -111,12 +117,16 @@ const NotificationDashboard: React.FC<NotificationDashboardProps> = ({ darkMode 
     }
   };
 
-  useEffect(() => {
-    const storedDisabled = localStorage.getItem("disabledEventTypes");
-    if (storedDisabled) setDisabledEventTypes(JSON.parse(storedDisabled));
-    fetchPreferences();
-    fetchNotifications();
+useEffect(() => {
+  const storedDisabled = localStorage.getItem("disabledEventTypes");
+  if (storedDisabled) setDisabledEventTypes(JSON.parse(storedDisabled));
+  fetchPreferences();
+  fetchNotifications();
 
+  const socket = getSocket();
+  if (!socket) return;  // no realtime, but data is still fetched
+
+  
     const joinSocketRoom = async () => {
       try {
         const userResponse = await getUserData();
