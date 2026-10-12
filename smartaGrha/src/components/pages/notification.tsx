@@ -4,19 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 
 import styles from "../pagesmodulecss/notification.module.css";
-import {
-  getNotifications,
-  getUserPreferences,
-  updateUserPreferences,
-  getUserData,
-} from "../../services/api";
 
 import {
   getNotifications,
   getUserPreferences,
   updateUserPreferences,
   getUserData,
-  getSocket,
 } from "../../services/api";
 
 interface Notification {
