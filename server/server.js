@@ -552,6 +552,7 @@ app.use((err, req, res, next) => {
 const startServer = async () => {
   try {
     await connectDB();
+startPythonBackend();  
 // Start schedule checker
 startScheduleChecker(io);
 // Start sensor data cleanup
@@ -613,25 +614,6 @@ app.use("/api/transcribe",  pythonProxy);
 app.use("/api/conversations", pythonProxy);
 app.use("/api/esp32",       pythonProxy);
 
-
-const startServer = async () => {
-  try {
-    await connectDB();
-
-    startPythonBackend();    
-    startScheduleChecker(io);
-    startSensorDataCleanup();
-    startNotificationCleanup();
-    handleMqttMessages();
-
-    server.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error("Failed to start server due to MongoDB connection error:", error.message);
-    process.exit(1);
-  }
-};
 
 // Start the server
 startServer();
