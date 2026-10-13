@@ -31,6 +31,7 @@ import powerDataModel from "./models/powerDataModel.js";
 import ledRouter from './routes/ledRoutes.js';
 import { startNotificationCleanup } from "./controllers/notificationController.js";
 import cameraModel from "./models/cameraModel.js"; // Added missing import
+import { spawn } from "child_process";
 
 dotenv.config();
 
@@ -569,6 +570,69 @@ handleMqttMessages();
     process.exit(1);
   }
 };
+
+
+// ─── Start Python FastAPI backend ──────────────────────────────
+let pythonProcess = null;
+
+const startPythonBackend = () => {
+  const isWindows = process.platform === "win32";
+  const pythonCmd = isWindows ? "python" : "python3";
+
+  pythonProcess = spawn(pythonCmd, ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"], {
+    cwd: path.join(process.cwd(), "backend"), // 👈 path to folder containing main.py
+    stdio: ["ignore", "pipe", "pipe"],        // capture stdout/stderr
+    env: { ...process.env },
+  });
+
+  pythonProcess.stdout.on("data", (data) => console.log(`[PY] ${data.toString().trim()}`));
+  pythonProcess.stderr.on("data", (data) => console.error(`[PY-ERR] ${data.toString().trim()}`));
+
+  pythonProcess.on("close", (code) => {
+    console.error(`Python backend exited with code ${code}`);
+  });
+
+  console.log("🐍 Python FastAPI backend starting on http://127.0.0.1:8000");
+};
+
+// ─── Proxy chatbot / voice / ESP32 routes to Python FastAPI ───
+const pythonProxy = createProxyMiddleware({
+  target: "http://127.0.0.1:8000",
+  changeOrigin: true,
+  pathRewrite: (path) => path.replace(/^\/api/, ""), // strip /api prefix
+  onError: (err, req, res) => {
+    console.error("Python proxy error:", err.message);
+    res.status(502).json({ error: "Python backend unavailable", details: err.message });
+  },
+});
+
+// These routes hit the Python server instead of Node
+app.use("/api/chat",        pythonProxy);
+app.use("/api/speak",       pythonProxy);
+app.use("/api/transcribe",  pythonProxy);
+app.use("/api/conversations", pythonProxy);
+app.use("/api/esp32",       pythonProxy);
+
+
+const startServer = async () => {
+  try {
+    await connectDB();
+
+    startPythonBackend();          // 👈 ADD THIS
+    startScheduleChecker(io);
+    startSensorDataCleanup();
+    startNotificationCleanup();
+    handleMqttMessages();
+
+    server.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
+  }
+};
+
 
 // Start the server
 startServer();
