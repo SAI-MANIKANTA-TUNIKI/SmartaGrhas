@@ -35,6 +35,11 @@ import cameraModel from "./models/cameraModel.js"; // Added missing import
 dotenv.config();
 
 import { spawn } from "child_process";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url); 
+const __dirname = path.dirname(__filename);  
+
+dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
