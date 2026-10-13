@@ -34,12 +34,6 @@ import cameraModel from "./models/cameraModel.js"; // Added missing import
 
 dotenv.config();
 
-import { spawn } from "child_process";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url); 
-const __dirname = path.dirname(__filename);  
-
-dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
@@ -54,11 +48,8 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   },
-  transports: ["websocket", "polling"], 
-  allowUpgrades: true,
-  pingTimeout: 60000,
+  pingTimeout: 60000, // Increased to prevent idle disconnects on Render
   pingInterval: 25000,
-  maxHttpBufferSize: 1e6,
 });
 
 const PORT = process.env.PORT || 5000;
@@ -553,29 +544,10 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
-// Wait for Python to be ready
-const waitForPython = async (retries = 30) => {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const res = await fetch("http://127.0.0.1:8000/");
-      if (res.ok) {
-        console.log("✅ Python backend is ready!");
-        return true;
-      }
-    } catch (e) {
-      // Python not ready yet
-    }
-    await new Promise(r => setTimeout(r, 2000));
-  }
-  console.error("❌ Python backend did not start in time");
-  return false;
-};
-
 // MongoDB connection with error handling
 const startServer = async () => {
   try {
     await connectDB();
-startPythonBackend();  
 // Start schedule checker
 startScheduleChecker(io);
 // Start sensor data cleanup
@@ -594,70 +566,6 @@ handleMqttMessages();
     process.exit(1);
   }
 };
-
-
-// ─── Start Python FastAPI backend ──────────────────────────────
-let pythonProcess = null;
-const startPythonBackend = () => {
-  const isWindows = process.platform === "win32";
-
-  // Use the venv python if it exists, otherwise fall back to system python
-  const venvPython = isWindows
-    ? path.join(__dirname, "venv", "Scripts", "python.exe")
-    : path.join(__dirname, "venv", "bin", "python3");
-
-  const pythonCmd = fs.existsSync(venvPython)
-    ? venvPython
-    : (isWindows ? "python" : "python3");
-
-  console.log(`🐍 Using Python: ${pythonCmd}`);
-
-  pythonProcess = spawn(
-    pythonCmd,
-    ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"],
-    {
-      cwd: __dirname,
-      stdio: ["ignore", "pipe", "pipe"],
-      env: { ...process.env },
-      detached: false,
-    }
-  );
-
-  pythonProcess.stdout.on("data", (data) =>
-    console.log(`[PY] ${data.toString().trim()}`)
-  );
-  pythonProcess.stderr.on("data", (data) =>
-    console.error(`[PY-ERR] ${data.toString().trim()}`)
-  );
-
-  pythonProcess.on("close", (code) => {
-    console.error(`Python backend exited with code ${code}`);
-  });
-
-  console.log("🐍 Python FastAPI backend starting on http://127.0.0.1:8000");
-};
-
-
-// ─── Proxy chatbot / voice / ESP32 routes to Python FastAPI ───
-const pythonProxy = createProxyMiddleware({
-  target: "http://127.0.0.1:8000",
-  changeOrigin: true,
-  pathRewrite: (path) => path.replace(/^\/api/, ""),
-  timeout: 300000,          // 5 minutes
-  proxyTimeout: 300000,     // 5 minutes
-  onError: (err, req, res) => {
-    console.error("Python proxy error:", err.message);
-    res.status(502).json({ error: "Python backend unavailable", details: err.message });
-  },
-});
-
-// These routes hit the Python server instead of Node
-app.use("/api/chat",        pythonProxy);
-app.use("/api/speak",       pythonProxy);
-app.use("/api/transcribe",  pythonProxy);
-app.use("/api/conversations", pythonProxy);
-app.use("/api/esp32",       pythonProxy);
-
 
 // Start the server
 startServer();
