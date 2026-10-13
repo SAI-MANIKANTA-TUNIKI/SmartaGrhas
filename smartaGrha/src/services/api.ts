@@ -246,7 +246,7 @@ export async function transcribeAudio(blob: Blob): Promise<string> {
   const form = new FormData();
   form.append("audio", blob, "recording.webm");
 
-  const res = await fetch(`${API_BASE_URL}/transcribe`, {
+  const res = await fetch(`${API_BASE_URL}/api/transcribe`, {
     method: "POST",
     body: form,
   });
@@ -263,7 +263,7 @@ export async function sendChat(
   message: string,
   conversationId: number | null = null
 ): Promise<ChatResponse> {
-  const res = await fetch(`${API_BASE_URL}/chat`, {
+  const res = await fetch(`${API_BASE_URL}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -283,7 +283,7 @@ export async function textToSpeech(
   text: string,
   lang = "en"
 ): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/speak`, {
+  const res = await fetch(`${API_BASE_URL}/api/speak`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ text, lang }),
@@ -298,7 +298,7 @@ export async function textToSpeech(
 }
 
 export async function getConversations(): Promise<Conversation[]> {
-  const res = await fetch(`${API_BASE_URL}/conversations`);
+  const res = await fetch(`${API_BASE_URL}/api/conversations`);
   if (!res.ok) throw new Error("Failed to load conversations");
   return res.json();
 }
@@ -306,13 +306,13 @@ export async function getConversations(): Promise<Conversation[]> {
 export async function getConversationMessages(
   convId: number
 ): Promise<Message[]> {
-  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/messages`);
+  const res = await fetch(`${API_BASE_URL}/api/conversations/${convId}/messages`);
   if (!res.ok) throw new Error("Failed to load messages");
   return res.json();
 }
 
 export async function deleteConversation(convId: number): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/conversations/${convId}`, {
+  const res = await fetch(`${API_BASE_URL}/api/conversations/${convId}`, {
     method: "DELETE",
   });
   if (!res.ok) throw new Error("Failed to delete conversation");
@@ -322,7 +322,7 @@ export async function renameConversation(
   convId: number,
   title: string
 ): Promise<void> {
-  const res = await fetch(`${API_BASE_URL}/conversations/${convId}/title`, {
+  const res = await fetch(`${API_BASE_URL}/api/conversations/${convId}/title`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ title }),
