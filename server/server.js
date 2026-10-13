@@ -580,19 +580,36 @@ handleMqttMessages();
 
 // ─── Start Python FastAPI backend ──────────────────────────────
 let pythonProcess = null;
-
 const startPythonBackend = () => {
   const isWindows = process.platform === "win32";
-  const pythonCmd = isWindows ? "python" : "python3";
 
-  pythonProcess = spawn(pythonCmd, ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"], {
-    cwd: __dirname, 
-    stdio: ["ignore", "pipe", "pipe"],
-    env: { ...process.env },
-  });
+  // Use the venv python if it exists, otherwise fall back to system python
+  const venvPython = isWindows
+    ? path.join(__dirname, "venv", "Scripts", "python.exe")
+    : path.join(__dirname, "venv", "bin", "python3");
 
-  pythonProcess.stdout.on("data", (data) => console.log(`[PY] ${data.toString().trim()}`));
-  pythonProcess.stderr.on("data", (data) => console.error(`[PY-ERR] ${data.toString().trim()}`));
+  const pythonCmd = fs.existsSync(venvPython)
+    ? venvPython
+    : (isWindows ? "python" : "python3");
+
+  console.log(`🐍 Using Python: ${pythonCmd}`);
+
+  pythonProcess = spawn(
+    pythonCmd,
+    ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"],
+    {
+      cwd: __dirname,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: { ...process.env },
+    }
+  );
+
+  pythonProcess.stdout.on("data", (data) =>
+    console.log(`[PY] ${data.toString().trim()}`)
+  );
+  pythonProcess.stderr.on("data", (data) =>
+    console.error(`[PY-ERR] ${data.toString().trim()}`)
+  );
 
   pythonProcess.on("close", (code) => {
     console.error(`Python backend exited with code ${code}`);
@@ -600,6 +617,7 @@ const startPythonBackend = () => {
 
   console.log("🐍 Python FastAPI backend starting on http://127.0.0.1:8000");
 };
+
 
 // ─── Proxy chatbot / voice / ESP32 routes to Python FastAPI ───
 const pythonProxy = createProxyMiddleware({
