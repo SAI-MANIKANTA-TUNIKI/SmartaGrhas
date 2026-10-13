@@ -580,8 +580,8 @@ const startPythonBackend = () => {
   const pythonCmd = isWindows ? "python" : "python3";
 
   pythonProcess = spawn(pythonCmd, ["-m", "uvicorn", "main:app", "--host", "127.0.0.1", "--port", "8000"], {
-    cwd: path.join(process.cwd(), "backend"), // 👈 path to folder containing main.py
-    stdio: ["ignore", "pipe", "pipe"],        // capture stdout/stderr
+    cwd: __dirname, 
+    stdio: ["ignore", "pipe", "pipe"],
     env: { ...process.env },
   });
 
@@ -618,7 +618,7 @@ const startServer = async () => {
   try {
     await connectDB();
 
-    startPythonBackend();          // 👈 ADD THIS
+    startPythonBackend();    
     startScheduleChecker(io);
     startSensorDataCleanup();
     startNotificationCleanup();
@@ -628,11 +628,10 @@ const startServer = async () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
-    console.error("Failed to start server:", error.message);
+    console.error("Failed to start server due to MongoDB connection error:", error.message);
     process.exit(1);
   }
 };
-
 
 // Start the server
 startServer();
