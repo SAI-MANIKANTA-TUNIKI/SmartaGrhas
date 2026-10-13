@@ -553,6 +553,24 @@ app.use((err, req, res, next) => {
   res.status(500).json({ success: false, message: "Internal server error" });
 });
 
+// Wait for Python to be ready
+const waitForPython = async (retries = 30) => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/");
+      if (res.ok) {
+        console.log("✅ Python backend is ready!");
+        return true;
+      }
+    } catch (e) {
+      // Python not ready yet
+    }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  console.error("❌ Python backend did not start in time");
+  return false;
+};
+
 // MongoDB connection with error handling
 const startServer = async () => {
   try {
@@ -601,6 +619,7 @@ const startPythonBackend = () => {
       cwd: __dirname,
       stdio: ["ignore", "pipe", "pipe"],
       env: { ...process.env },
+      detached: false,
     }
   );
 
@@ -623,7 +642,9 @@ const startPythonBackend = () => {
 const pythonProxy = createProxyMiddleware({
   target: "http://127.0.0.1:8000",
   changeOrigin: true,
-  pathRewrite: (path) => path.replace(/^\/api/, ""), // strip /api prefix
+  pathRewrite: (path) => path.replace(/^\/api/, ""),
+  timeout: 300000,          // 5 minutes
+  proxyTimeout: 300000,     // 5 minutes
   onError: (err, req, res) => {
     console.error("Python proxy error:", err.message);
     res.status(502).json({ error: "Python backend unavailable", details: err.message });
