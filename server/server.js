@@ -1,4 +1,5 @@
 // server.js
+import "./env.js"; 
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -31,10 +32,10 @@ import powerDataModel from "./models/powerDataModel.js";
 import ledRouter from './routes/ledRoutes.js';
 import { startNotificationCleanup } from "./controllers/notificationController.js";
 import cameraModel from "./models/cameraModel.js"; // Added missing import
-import { spawn } from "child_process";
 
 dotenv.config();
 
+import { spawn } from "child_process";
 const app = express();
 const server = http.createServer(app);
 
