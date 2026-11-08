@@ -8,12 +8,13 @@ interface Camera { _id: string; name: string; ip: string; userId: string; }
 interface CameraProps { darkMode: boolean; }
 interface FeedProps {
   camera: Camera; isPlaying: boolean; action: string;
-  setAction: (action: string) => void; darkMode: boolean;
+  setAction: (action: string) => void; 
+  // darkMode removed here to fix the TS error
 }
 
 const EASE = [0.22, 1, 0.36, 1] as [number, number, number, number];
 
-const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction, darkMode }) => {
+const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -259,7 +260,7 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
         <motion.div id="grid" className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }} layout>
           <AnimatePresence mode="popLayout">
             {visibleCameras.map((cam) => (
-              <CameraFeed key={cam._id} camera={cam} isPlaying={isPlaying} action={action} setAction={setAction} darkMode={darkMode} />
+              <CameraFeed key={cam._id} camera={cam} isPlaying={isPlaying} action={action} setAction={setAction} />
             ))}
           </AnimatePresence>
         </motion.div>
