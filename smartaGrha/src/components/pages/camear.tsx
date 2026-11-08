@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from '../pagesmodulecss/camear.module.css';
-
 import { getCameras, addCamera } from '../../services/api';
 
 interface Camera { _id: string; name: string; ip: string; userId: string; }
@@ -26,20 +25,20 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
   const width = 600; 
   const height = 400;
 
-  // --- 1. WebSocket Video & Audio Streaming ---
+  // --- WebSocket Stream Logic ---
   useEffect(() => {
     if (!isPlaying) {
       if (wsRef.current) wsRef.current.close();
       return;
     }
 
-    // Connect to Relay Server (Assuming all cameras use the same relay)
-    const ws = new WebSocket('ws://192.168.1.5:8080');
+    // Connect to your Node.js relay server (Port 8080)
+    const ws = new WebSocket('ws://192.168.1.5:8080'); 
     ws.binaryType = 'arraybuffer';
     wsRef.current = ws;
 
     ws.onopen = () => setStreamError(null);
-    ws.onerror = () => setStreamError(`Failed to connect to relay for ${camera.name}.`);
+    ws.onerror = () => setStreamError(`Failed to connect to relay.`);
     ws.onclose = () => setStreamError('Stream disconnected.');
 
     ws.onmessage = (event: MessageEvent) => {
@@ -49,7 +48,7 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
       const packetType = view[0];
 
       if (packetType === 0x01) {
-        // --- VIDEO DECODING ---
+        // Video Frame
         const jpegData = buffer.slice(1);
         const blob = new Blob([jpegData], { type: 'image/jpeg' });
         const url = URL.createObjectURL(blob);
@@ -64,7 +63,7 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
         };
         img.src = url;
       } else if (packetType === 0x02) {
-        // --- AUDIO DECODING ---
+        // Audio Frame
         if (!audioCtxRef.current || !isAudioEnabledRef.current) return;
 
         const pcmData = buffer.slice(1);
@@ -104,17 +103,13 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
         const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
         audioCtxRef.current = new AudioContextClass({ sampleRate: 16000 });
       }
-      if (audioCtxRef.current.state === 'suspended') {
-        await audioCtxRef.current.resume();
-      }
+      if (audioCtxRef.current.state === 'suspended') await audioCtxRef.current.resume();
       isAudioEnabledRef.current = true;
       setIsAudioEnabled(true);
-    } catch (e) {
-      console.error("Audio error", e);
-    }
+    } catch (e) { console.error("Audio error", e); }
   };
 
-  // --- 2. Action Handlers (Snapshot & Record) ---
+  // --- Actions (Snapshot & Record) ---
   useEffect(() => {
     if (action === 'snapshot') { takeSnapshot(); setAction('none'); }
     else if (action === 'download') { startRecording(); setAction('none'); }
@@ -141,9 +136,7 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
         const blob = new Blob(chunks, { type: 'video/webm' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = url; 
-        a.download = `${camera.name}-record.webm`;
-        a.click();
+        a.href = url; a.download = `${camera.name}-record.webm`; a.click();
       };
       recorder.start();
       setTimeout(() => recorder.stop(), 10000);
@@ -151,24 +144,12 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
   };
 
   return (
-    <motion.div
-      className={styles.feed}
-      layout
-      initial={{ opacity: 0, scale: 0.98 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.98 }}
-      transition={{ duration: 0.5, ease: EASE }}
-    >
+    <motion.div className={styles.feed} layout initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.98 }} transition={{ duration: 0.5, ease: EASE }}>
       <div className={styles.feedFrame} style={{ position: 'relative' }}>
         <canvas ref={canvasRef} width={width} height={height} className={styles.canvas} />
 
-        {streamError && (
-          <div className={styles.feedError}>
-            <span className={styles.feedErrorDot} /> {streamError}
-          </div>
-        )}
+        {streamError && <div className={styles.feedError}><span className={styles.feedErrorDot} /> {streamError}</div>}
 
-        {/* Live Indicator */}
         {isPlaying && !streamError && (
           <div className={styles.liveTag}>
             <motion.span className={styles.liveDot} animate={{ opacity: [1, 0.35, 1] }} transition={{ duration: 1.8, repeat: Infinity }} />
@@ -176,15 +157,10 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
           </div>
         )}
 
-        {/* Audio Enable Button */}
         {!isAudioEnabled && isPlaying && (
           <button
             onClick={enableAudio}
-            style={{
-              position: 'absolute', bottom: '10px', right: '10px', zIndex: 10,
-              padding: '6px 12px', backgroundColor: '#2563eb', color: 'white',
-              borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '12px'
-            }}
+            style={{ position: 'absolute', bottom: '10px', right: '10px', zIndex: 10, padding: '6px 12px', backgroundColor: '#2563eb', color: 'white', borderRadius: '4px', border: 'none', cursor: 'pointer', fontSize: '12px' }}
           >
             🔊 Enable Audio
           </button>
@@ -199,9 +175,6 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction,
   );
 };
 
-// ==========================================
-// MAIN COMPONENT
-// ==========================================
 const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -235,14 +208,11 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
 
   const cols = Math.ceil(Math.sqrt(viewMode));
   const rows = Math.ceil(viewMode / cols);
-  const visibleCameras =
-    viewMode === 1 && cameras.length > 0 ? [cameras[selectedIndex]] : cameras.slice(0, viewMode);
-
+  const visibleCameras = viewMode === 1 && cameras.length > 0 ? [cameras[selectedIndex]] : cameras.slice(0, viewMode);
   const iconColor = darkMode ? '%23f0ede7' : '%230e0e0c';
 
   return (
     <div className={`${styles.container} ${darkMode ? styles.dark : ''}`}>
-      {/* Top bar */}
       <header className={styles.topbar}>
         <div>
           <p className={styles.eyebrow}>Security · Cameras</p>
@@ -258,7 +228,6 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
         </div>
       </header>
 
-      {/* Control drawer */}
       <AnimatePresence initial={false}>
         {showSettings && (
           <motion.section className={styles.drawer} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto', marginBottom: '1.5rem' }} exit={{ opacity: 0, height: 0 }} style={{ overflow: 'hidden' }}>
@@ -286,7 +255,6 @@ const CameraComponent: React.FC<CameraProps> = ({ darkMode }) => {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
       <div className={styles.main}>
         <motion.div id="grid" className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, 1fr)`, gridTemplateRows: `repeat(${rows}, 1fr)` }} layout>
           <AnimatePresence mode="popLayout">
