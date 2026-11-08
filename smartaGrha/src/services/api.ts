@@ -101,8 +101,10 @@ export const resetPassword = (data: { email: string; otp: string; password: stri
 // CAMERA API (Kept here, removed from the bottom)
 // ------------------------------------------------------------
 export const getCameras = () => api.get("/camera");
-export const addCamera = (dexport const updateCamera = (id: string, data: { name: string }) => api.put(`/camera/${id}`, data); 
-export const deleteCamera = (id: string) => api.delete(`/camera/${id}`); 
+export const addCamera = (data: { name: string; macAddress: string }) => api.post("/camera", data);
+export const updateCamera = (id: string, data: { name: string }) => api.put(`/camera/${id}`, data);
+export const deleteCamera = (id: string) => api.delete(`/camera/${id}`);
+
 export const addRoom = (data: { name: string; esp32_ip: string; device_id: string }) =>
   api.post("/room/add", data);
 
