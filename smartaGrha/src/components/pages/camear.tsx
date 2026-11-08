@@ -29,8 +29,8 @@ const CameraFeed: React.FC<FeedProps> = ({ camera, isPlaying, action, setAction 
     }
 
     // Use wss:// for Render
-    const ws = new WebSocket('wss://smartagrhas.onrender.com'); 
-    ws.binaryType = 'arraybuffer';
+const ws = new WebSocket('wss://smartagrhas.onrender.com/ws'); 
+ws.binaryType = 'arraybuffer';
     wsRef.current = ws;
 
     ws.onopen = () => setStreamError(null);
