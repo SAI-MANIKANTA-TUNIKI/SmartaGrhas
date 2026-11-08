@@ -511,20 +511,44 @@ app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
 // This runs alongside your Express server on port 8080
-const wss = new WebSocketServer({ port: 8080 });
-console.log('WebSocket Relay running on ws://0.0.0.0:8080');
+const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
-  console.log('A WebSocket client connected (ESP32 or React)');
+  ws.on('message', async (data) => {
+    if (!data || data.length === 0) return;
+    
+    // --- NEW: Handle Camera Registration (0x00) ---
+    if (data[0] === 0x00) {
+      try {
+        const jsonStr = data.slice(1).toString('utf8');
+        const { mac, ip } = JSON.parse(jsonStr);
+        
+        // Update camera's IP in the database matching the MAC
+        const updatedCam = await cameraModel.findOneAndUpdate(
+          { macAddress: mac },
+          { ip: ip },
+          { new: true }
+        );
+        
+        if (updatedCam) {
+           console.log(`Camera ${mac} registered with IP: ${ip}`);
+           // Notify frontend to refresh camera list
+           io.emit("camera_connected", updatedCam); 
+        }
+      } catch (e) {
+        console.error("Registration error:", e);
+      }
+      return; // Do not broadcast registration packets to React
+    }
 
-  ws.on('message', (data) => {
-    // Broadcast the video/audio binary packet to all connected React clients
+    // --- Existing: Broadcast Video (0x01) & Audio (0x02) ---
     wss.clients.forEach((client) => {
-      if (client !== ws && client.readyState === 1) { // 1 = OPEN
+      if (client !== ws && client.readyState === 1) {
         client.send(data);
       }
     });
   });
+});
 
   ws.on('close', () => console.log('WebSocket client disconnected'));
 });
