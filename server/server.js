@@ -511,22 +511,28 @@ app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
 // This runs alongside your Express server on port 8080
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer: true });
+
+// Handle the HTTP upgrade request
+server.on('upgrade', (request, socket, head) => {
+  // You can add path checking here if needed (e.g., if (request.url === '/ws'))
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit('connection', ws, request);
+  });
+});
 
 wss.on('connection', (ws) => {
-
   console.log('WebSocket client connected');
 
   ws.on('message', async (data) => {
     if (!data || data.length === 0) return;
 
-    // Handle Camera Registration (0x00)
+    // 0x00 = Camera Registration (MAC & IP)
     if (data[0] === 0x00) {
       try {
         const jsonStr = data.slice(1).toString('utf8');
         const { mac, ip } = JSON.parse(jsonStr);
 
-        // Update camera IP using MAC address
         const updatedCam = await cameraModel.findOneAndUpdate(
           { macAddress: mac },
           { $set: { ip: ip } },
@@ -535,21 +541,15 @@ wss.on('connection', (ws) => {
 
         if (updatedCam) {
           console.log(`Camera ${mac} registered with IP: ${ip}`);
-
-          // Notify React frontend
           io.emit('camera_connected', updatedCam);
-        } else {
-          console.log(`Camera not found for MAC: ${mac}`);
         }
-
       } catch (e) {
         console.error('Registration error:', e);
       }
-
       return;
     }
 
-    // Broadcast Video (0x01) and Audio (0x02)
+    // 0x01 = Video, 0x02 = Audio
     if (data[0] === 0x01 || data[0] === 0x02) {
       wss.clients.forEach((client) => {
         if (client !== ws && client.readyState === 1) {
@@ -559,15 +559,8 @@ wss.on('connection', (ws) => {
     }
   });
 
-  // Handle WebSocket disconnection
-  ws.on('close', () => {
-    console.log('WebSocket client disconnected');
-  });
-
-  ws.on('error', (err) => {
-    console.error('WebSocket error:', err);
-  });
-
+  ws.on('close', () => console.log('WebSocket client disconnected'));
+  ws.on('error', (err) => console.error('WebSocket error:', err));
 });
 
 // Schedule endpoint with notification
