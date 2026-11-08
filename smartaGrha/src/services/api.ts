@@ -82,7 +82,7 @@ export const reconnectSocket = (userId: string) => {
 };
 
 // ============================================================
-// All your existing API functions below (UNCHANGED)
+// All your existing API functions below
 // ============================================================
 
 export const register = (data: { name: string; email: string; password: string }) =>
@@ -97,7 +97,9 @@ export const sendResetOtp = (data: { email: string }) => api.post("/auth/send-re
 export const resetPassword = (data: { email: string; otp: string; password: string }) =>
   api.post("/auth/reset-password", data);
 
-
+// ------------------------------------------------------------
+// CAMERA API (Kept here, removed from the bottom)
+// ------------------------------------------------------------
 export const getCameras = () => api.get("/camera");
 export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
 
@@ -192,8 +194,7 @@ export interface UserData {
 
 export const getUserData = (): Promise<{ data: UserData }> => api.get("/user/data");
 
-export const getCameras = () => api.get("/camera");
-export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
+// (Duplicate getCameras/addCamera removed from here)
 
 export const getPowerEntries = (timeRange: string) => api.get(`/power/entries?timeRange=${timeRange}`);
 export const getRoomPowers = () => api.get("/power/room-powers");
@@ -226,7 +227,7 @@ export const updateProfile = (formData: FormData) =>
   });
 
 // ─────────────────────────────────────────────────────
-// Chatbot types & functions (UNCHANGED)
+// Chatbot types & functions
 // ─────────────────────────────────────────────────────
 
 export interface Conversation {
