@@ -510,19 +510,24 @@ app.use("/api/preferences", userPreferencesRouter);
 app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
-// This runs alongside your Express server on port 8080
+// This runs alongside your Express server on port 
+
 const wss = new WebSocketServer({ noServer: true });
 
-// Handle the HTTP upgrade request
+// Listen for upgrade requests specifically for the '/ws' path
 server.on('upgrade', (request, socket, head) => {
-  // You can add path checking here if needed (e.g., if (request.url === '/ws'))
-  wss.handleUpgrade(request, socket, head, (ws) => {
-    wss.emit('connection', ws, request);
-  });
+  const pathname = new URL(request.url, 'http://localhost').pathname;
+  
+  if (pathname === '/ws') {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  }
+  // Note: Socket.IO handles its own '/socket.io/' upgrades, so we leave them alone.
 });
 
 wss.on('connection', (ws) => {
-  console.log('WebSocket client connected');
+  console.log('WebSocket client connected to /ws');
 
   ws.on('message', async (data) => {
     if (!data || data.length === 0) return;
