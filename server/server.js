@@ -509,6 +509,25 @@ app.use("/api/preferences", userPreferencesRouter);
 app.use("/api/power", powerRouter);
 app.use('/api/led', ledRouter);
 
+// This runs alongside your Express server on port 8080
+const wss = new WebSocketServer({ port: 8080 });
+console.log('WebSocket Relay running on ws://0.0.0.0:8080');
+
+wss.on('connection', (ws) => {
+  console.log('A WebSocket client connected (ESP32 or React)');
+
+  ws.on('message', (data) => {
+    // Broadcast the video/audio binary packet to all connected React clients
+    wss.clients.forEach((client) => {
+      if (client !== ws && client.readyState === 1) { // 1 = OPEN
+        client.send(data);
+      }
+    });
+  });
+
+  ws.on('close', () => console.log('WebSocket client disconnected'));
+});
+
 // Schedule endpoint with notification
 app.post("/api/schedule", async (req, res) => {
   try {
