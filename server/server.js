@@ -7,6 +7,7 @@ import cookieParser from "cookie-parser";
 import { Server } from "socket.io";
 import http from "http";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { WebSocketServer } from "ws";
 import connectDB from "./config/mongodb.js";
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
