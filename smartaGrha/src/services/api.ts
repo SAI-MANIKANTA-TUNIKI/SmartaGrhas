@@ -98,8 +98,8 @@ export const resetPassword = (data: { email: string; otp: string; password: stri
   api.post("/auth/reset-password", data);
 
 
-export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
 export const getCameras = () => api.get("/camera");
+export const addCamera = (data: { name: string; ip: string }) => api.post("/camera", data);
 
 export const addRoom = (data: { name: string; esp32_ip: string; device_id: string }) =>
   api.post("/room/add", data);
